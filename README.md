@@ -6,19 +6,23 @@ Users can download dynamic, auto-generated vertical story posters of their brack
 
 ---
 
-## 📸 Screenshots
+## 📸 Screenshots & How to Capture Them
 
-![alt text](image.png)
-> **[Main Dashboard Preview]**
+### 1. Main Dashboard & Tournament Bracket
+![Main Dashboard & Bracket](image.png)
+> **How to capture**: Open the application home page (`/`), select the **"Knockout Bracket"** tab, make a few predictions, and take a wide screenshot showing the interactive elimination tree.
 
-![alt text](image-1.png)
-> **[Premium Ambient Player & Header Metrics]**
+### 2. Premium Ambient Player & Header Metrics
+![Ambient Player & Metrics](image-1.png)
+> **How to capture**: Focus on the top banner card of the main dashboard page (`/`). Click the Play button on the rightmost card under **"BACKGROUND AMBIENT"** to start the audio and trigger the glowing green border, and capture the header metrics grid.
 
-![alt text](image-2.png)
-> **[Global Community Stats Subpage]**
+### 3. Global Community Stats Portal
+![Global Community Stats Portal](image-2.png)
+> **How to capture**: Click the **"Stats"** link in the header to navigate to `/stats`. Take a screenshot displaying the dynamic "Total Brackets Submitted" count-up ticker and the top predicted champion country progress bars.
 
-![alt text](image-3.png)
-> **[Share Modal & Story Poster Preview]**
+### 4. Sharing Terminal & Mobile Story Poster Preview
+![Sharing Terminal & Poster Preview](image-3.png)
+> **How to capture**: Complete the predictions down to the Final, click the **"Awards Ceremony & Share"** floating action button, complete your awards selection in the gala modal, and hit submit. In the final **"Share Your Bracket" modal**, take a screenshot showing the vertical 9:16 story preview and the download/social sharing options.
 
 ---
 
