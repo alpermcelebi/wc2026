@@ -62,7 +62,11 @@ export const MatchCard: React.FC<MatchCardProps> = ({
         const validated = Math.max(0, num);
         onScoreChange(validated, awayScore, homePenalties, awayPenalties);
         if (awayScore !== null && onComplete) {
-          setTimeout(() => onComplete(id), 50);
+          if (isKnockout && validated === awayScore) {
+            // Tied knockout match requires penalties, do not auto-complete yet
+          } else {
+            setTimeout(() => onComplete(id), 50);
+          }
         }
       }
     }
@@ -78,7 +82,11 @@ export const MatchCard: React.FC<MatchCardProps> = ({
         const validated = Math.max(0, num);
         onScoreChange(homeScore, validated, homePenalties, awayPenalties);
         if (homeScore !== null && onComplete) {
-          setTimeout(() => onComplete(id), 50);
+          if (isKnockout && validated === homeScore) {
+            // Tied knockout match requires penalties, do not auto-complete yet
+          } else {
+            setTimeout(() => onComplete(id), 50);
+          }
         }
       }
     }
