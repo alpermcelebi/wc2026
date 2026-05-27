@@ -15,6 +15,7 @@ export interface Match {
   homeScore: number | null;
   awayScore: number | null;
   isCompleted: boolean;
+  status?: 'SCHEDULED' | 'LIVE' | 'FINISHED';
   homePenalties?: number | null;
   awayPenalties?: number | null;
   // Fields to store custom user picks/predictions

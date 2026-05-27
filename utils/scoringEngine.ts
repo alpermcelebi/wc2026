@@ -44,7 +44,8 @@ export function calculateBracketScore(
     const actual = actualResults.matches[id];
     const user = userPreds.matches[id];
     
-    if (!actual || !user || actual.stage !== 'group' || !actual.isCompleted || actual.homeScore === null || actual.awayScore === null) return;
+    // Only evaluate if the actual match has finished (status === 'FINISHED')
+    if (!actual || !user || actual.stage !== 'group' || actual.status !== 'FINISHED' || actual.homeScore === null || actual.awayScore === null) return;
 
     if (user.isCompleted && user.homeScore !== null && user.awayScore !== null) {
       // Correct Exact Score (2 points)
@@ -68,7 +69,8 @@ export function calculateBracketScore(
     const actual = actualResults.matches[id];
     const user = userPreds.matches[id];
     
-    if (!actual || !user || actual.stage === 'group' || !actual.isCompleted) return;
+    // Only evaluate if the actual match has finished (status === 'FINISHED')
+    if (!actual || !user || actual.stage === 'group' || actual.status !== 'FINISHED') return;
 
     const actualWinner = getMatchWinner(actual);
     const userWinner = getMatchWinner(user);
@@ -113,7 +115,11 @@ export function generateMockActualResults(
   mode: 'simulation' | 'perfect'
 ): { matches: Record<string, Match>; awards: AwardsState } {
   if (mode === 'perfect') {
-    return JSON.parse(JSON.stringify(userPreds));
+    const cloned = JSON.parse(JSON.stringify(userPreds)) as { matches: Record<string, Match>; awards: AwardsState };
+    Object.values(cloned.matches).forEach(m => {
+      m.status = 'FINISHED';
+    });
+    return cloned;
   }
 
   // Create simulated copy of base matches
@@ -122,6 +128,7 @@ export function generateMockActualResults(
   // Simulate group stage matches as completed with realistic scores
   Object.keys(simulatedMatches).forEach(id => {
     const match = simulatedMatches[id];
+    match.status = 'FINISHED';
     if (match.stage === 'group') {
       match.isCompleted = true;
       // We vary some scores from user's predictions, and match some exactly
@@ -139,6 +146,7 @@ export function generateMockActualResults(
   // For simplicity, knockout matches in simulated results will match the user's knockout structure but with 75% correct outcomes
   Object.keys(simulatedMatches).forEach(id => {
     const match = simulatedMatches[id];
+    match.status = 'FINISHED';
     if (match.stage !== 'group') {
       const seed = id.charCodeAt(id.length - 1);
       match.isCompleted = true;

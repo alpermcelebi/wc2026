@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTournamentStore } from '../store/useTournamentStore';
 import { calculateBracketScore, generateMockActualResults, ScoringResult } from '../utils/scoringEngine';
-import { Trophy, Search, Sparkles, TrendingUp, CheckCircle2, XCircle, AlertCircle, Loader2, Sparkle } from 'lucide-react';
+import { Trophy, Search, Sparkles, TrendingUp, CheckCircle2, XCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Match, AwardsState, Stage } from '../types/tournament';
 import { MOCK_PLAYERS } from '../utils/playersData';
 
@@ -12,13 +12,13 @@ interface TrackScoreViewProps {
 }
 
 export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = null }) => {
-  const { groups } = useTournamentStore();
+  const { groups, matches: storeMatches } = useTournamentStore();
   
   const [bracketCode, setBracketCode] = useState(initialCode || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadedPredictions, setLoadedPredictions] = useState<{ matches: Record<string, Match>; awards: AwardsState } | null>(null);
-  const [compareMode, setCompareMode] = useState<'simulation' | 'perfect'>('simulation');
+  const [compareMode, setCompareMode] = useState<'live' | 'simulation' | 'perfect'>('live');
   const [activeSubTab, setActiveSubTab] = useState<'groups' | 'knockouts' | 'awards'>('groups');
 
   // Build team flag and name lookups from store groups
@@ -121,8 +121,20 @@ export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = nu
   // Generate actual simulated results based on current predictions and chosen compare mode
   const actualResults = useMemo(() => {
     if (!loadedPredictions) return null;
+    if (compareMode === 'live') {
+      // Live mode uses the actual store matches (by default scheduled until finished)
+      return {
+        matches: storeMatches,
+        awards: {
+          goldenBall: null,
+          goldenBoot: null,
+          goldenGlove: null,
+          bestYoungPlayer: null
+        }
+      };
+    }
     return generateMockActualResults(loadedPredictions, compareMode);
-  }, [loadedPredictions, compareMode]);
+  }, [loadedPredictions, compareMode, storeMatches]);
 
   // Calculate scores
   const scoreResults = useMemo((): ScoringResult | null => {
@@ -242,7 +254,7 @@ export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = nu
       {loadedPredictions && actualResults && scoreResults && (
         <div className="space-y-8 animate-fadeIn">
           {/* Controls & Mode selectors */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/5 border border-white/5 p-4 rounded-3xl backdrop-blur-md">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-4 bg-white/5 border border-white/5 p-4 rounded-3xl backdrop-blur-md">
             <div>
               <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest">
                 Currently Tracking Bracket
@@ -252,10 +264,22 @@ export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = nu
               </h3>
             </div>
 
-            <div className="flex bg-white/5 border border-white/10 rounded-2xl p-1 gap-1 w-full sm:w-auto">
+            <div className="flex bg-white/5 border border-white/10 rounded-2xl p-1 gap-1 w-full lg:w-auto overflow-x-auto scrollbar-none">
               <button
+                type="button"
+                onClick={() => setCompareMode('live')}
+                className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap ${
+                  compareMode === 'live'
+                    ? 'bg-brand-purple text-white shadow-lg shadow-brand-purple/20'
+                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                Real-world Results
+              </button>
+              <button
+                type="button"
                 onClick={() => setCompareMode('simulation')}
-                className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black transition-all ${
+                className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap ${
                   compareMode === 'simulation'
                     ? 'bg-brand-purple text-white shadow-lg shadow-brand-purple/20'
                     : 'text-zinc-400 hover:text-white hover:bg-white/5'
@@ -264,8 +288,9 @@ export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = nu
                 Realistic Simulation
               </button>
               <button
+                type="button"
                 onClick={() => setCompareMode('perfect')}
-                className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black transition-all ${
+                className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap ${
                   compareMode === 'perfect'
                     ? 'bg-brand-purple text-white shadow-lg shadow-brand-purple/20'
                     : 'text-zinc-400 hover:text-white hover:bg-white/5'
@@ -409,18 +434,24 @@ export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = nu
                     const actHome = actualMatch.homeScore ?? 0;
                     const actAway = actualMatch.awayScore ?? 0;
 
-                    const isCorrectScore = predHome === actHome && predAway === actAway;
+                    const isScheduled = actualMatch.status === 'SCHEDULED' || !actualMatch.status;
+
+                    const isCorrectScore = !isScheduled && predHome === actHome && predAway === actAway;
                     
                     const predOutcome = predHome > predAway ? 'home' : predHome < predAway ? 'away' : 'draw';
                     const actOutcome = actHome > actAway ? 'home' : actHome < actAway ? 'away' : 'draw';
-                    const isCorrectOutcome = predOutcome === actOutcome;
+                    const isCorrectOutcome = !isScheduled && predOutcome === actOutcome;
 
                     let ptsGained = 0;
                     let badgeColor = 'bg-red-500/10 text-red-400 border-red-500/20';
                     let badgeLabel = 'Incorrect';
                     let Icon = XCircle;
 
-                    if (isCorrectScore) {
+                    if (isScheduled) {
+                      badgeColor = 'bg-white/5 text-zinc-400 border-white/10';
+                      badgeLabel = 'Upcoming';
+                      Icon = AlertCircle;
+                    } else if (isCorrectScore) {
                       ptsGained = 2;
                       badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
                       badgeLabel = 'Correct Score';
@@ -459,7 +490,7 @@ export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = nu
                             </div>
                             <div className="flex items-center gap-3 font-mono text-xs">
                               <span className="text-white/40" title="Predicted">{predHome}</span>
-                              <span className="text-white font-black" title="Actual">{actHome}</span>
+                              <span className="text-white font-black" title="Actual">{isScheduled ? '—' : actHome}</span>
                             </div>
                           </div>
 
@@ -479,7 +510,7 @@ export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = nu
                             </div>
                             <div className="flex items-center gap-3 font-mono text-xs">
                               <span className="text-white/40" title="Predicted">{predAway}</span>
-                              <span className="text-white font-black" title="Actual">{actAway}</span>
+                              <span className="text-white font-black" title="Actual">{isScheduled ? '—' : actAway}</span>
                             </div>
                           </div>
                         </div>
@@ -491,7 +522,7 @@ export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = nu
                             {badgeLabel}
                           </span>
                           <span className="font-mono text-sm font-black text-white">
-                            +{ptsGained} pts
+                            {isScheduled ? '—' : `+${ptsGained} pts`}
                           </span>
                         </div>
                       </div>
@@ -509,6 +540,8 @@ export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = nu
                     const actualMatch = actualResults.matches[predMatch.id];
                     if (!actualMatch) return null;
 
+                    const isScheduled = actualMatch.status === 'SCHEDULED' || !actualMatch.status;
+
                     // Compute winners
                     const getMatchWinnerLocal = (m: Match) => {
                       if (m.homeScore === null || m.awayScore === null) return null;
@@ -523,9 +556,9 @@ export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = nu
                     };
 
                     const predWinner = getMatchWinnerLocal(predMatch);
-                    const actWinner = getMatchWinnerLocal(actualMatch);
+                    const actWinner = isScheduled ? null : getMatchWinnerLocal(actualMatch);
 
-                    const isCorrectWinner = predWinner && actWinner && predWinner === actWinner;
+                    const isCorrectWinner = !isScheduled && predWinner && actWinner && predWinner === actWinner;
                     const ptsValue = predMatch.id === 'FINAL' ? 10 : 5;
                     const ptsGained = isCorrectWinner ? ptsValue : 0;
 
@@ -533,7 +566,11 @@ export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = nu
                     let badgeLabel = 'Incorrect';
                     let Icon = XCircle;
 
-                    if (isCorrectWinner) {
+                    if (isScheduled) {
+                      badgeColor = 'bg-white/5 text-zinc-400 border-white/10';
+                      badgeLabel = 'Upcoming';
+                      Icon = AlertCircle;
+                    } else if (isCorrectWinner) {
                       badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
                       badgeLabel = predMatch.id === 'FINAL' ? 'Champion Crowned!' : 'Correct Advance';
                       Icon = CheckCircle2;
@@ -583,7 +620,7 @@ export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = nu
                               </span>
                             </div>
                             <div className="font-mono text-zinc-400">
-                              Act: <span className="text-white font-bold">{actualMatch.homeScore ?? '-'}{actualMatch.homeScore === actualMatch.awayScore && actualMatch.homePenalties !== undefined ? ` (${actualMatch.homePenalties})` : ''}</span>
+                              Act: <span className="text-white font-bold">{isScheduled ? '-' : (actualMatch.homeScore ?? '-')}{!isScheduled && actualMatch.homeScore === actualMatch.awayScore && actualMatch.homePenalties !== undefined ? ` (${actualMatch.homePenalties})` : ''}</span>
                             </div>
                           </div>
                         </div>
@@ -595,7 +632,7 @@ export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = nu
                             {badgeLabel}
                           </span>
                           <span className="font-mono text-sm font-black text-white">
-                            +{ptsGained} pts
+                            {isScheduled ? '—' : `+${ptsGained} pts`}
                           </span>
                         </div>
                       </div>
@@ -616,14 +653,19 @@ export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = nu
                     const predPlayer = getPlayerDetails(predId);
                     const actPlayer = getPlayerDetails(actId);
 
-                    const isMatched = predId && actId && predId === actId;
+                    const isScheduled = !actId;
+                    const isMatched = !isScheduled && predId && actId && predId === actId;
                     const ptsGained = isMatched ? 8 : 0;
 
                     let badgeColor = 'bg-red-500/10 text-red-400 border-red-500/20';
                     let badgeLabel = 'Incorrect';
                     let Icon = XCircle;
 
-                    if (isMatched) {
+                    if (isScheduled) {
+                      badgeColor = 'bg-white/5 text-zinc-400 border-white/10';
+                      badgeLabel = 'Upcoming';
+                      Icon = AlertCircle;
+                    } else if (isMatched) {
                       badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
                       badgeLabel = 'Award Match!';
                       Icon = CheckCircle2;
@@ -687,7 +729,9 @@ export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = nu
 
                         <div className="flex justify-between items-center pt-2 border-t border-white/5 text-xs text-zinc-400">
                           <span>Point Gain</span>
-                          <span className="font-mono font-bold text-white">+{ptsGained} pts</span>
+                          <span className="font-mono font-bold text-white">
+                            {isScheduled ? '—' : `+${ptsGained} pts`}
+                          </span>
                         </div>
                       </div>
                     );

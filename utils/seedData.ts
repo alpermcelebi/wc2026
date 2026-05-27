@@ -117,7 +117,8 @@ export const generateGroupMatches = (): Record<string, Match> => {
         awayTeam: fixture.away,
         homeScore: null,
         awayScore: null,
-        isCompleted: false
+        isCompleted: false,
+        status: 'SCHEDULED'
       };
     });
   });
@@ -300,6 +301,10 @@ export const generateKnockoutMatches = (): Record<string, Match> => {
     home_slot: 'Winner SF_1',
     away_slot: 'Winner SF_2'
   };
+
+  Object.values(matches).forEach(m => {
+    m.status = 'SCHEDULED';
+  });
 
   return matches;
 };
