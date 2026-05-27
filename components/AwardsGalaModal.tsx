@@ -396,78 +396,70 @@ export default function AwardsGalaModal({
             </div>
           ) : (
             <div className="flex-1 flex flex-col justify-between h-full">
-              {/* Main Podium View Grid */}
-              <div className="grid grid-cols-2 gap-4 w-full px-2 items-end min-h-[360px] pt-4">
+
+              {/* Main Awards Grid (Uniform card sizing) */}
+              <div className="grid grid-cols-2 gap-4 w-full px-2 pt-4">
                 {AWARD_CONFIGS.map(award => {
                   const player = getSelectedPlayerDetails(award.key);
-                  // Podium height configuration based on rank
-                  const heightClass = 
-                    award.rank === 1 ? 'h-36' :
-                    award.rank === 2 ? 'h-28' :
-                    award.rank === 3 ? 'h-24' :
-                    'h-20';
-
                   return (
-                    <div key={award.key} className="flex flex-col items-center group">
-                      
-                      {/* Player Card (Floats above podium) */}
-                      <div className="mb-3 w-full flex flex-col items-center transition-all duration-300 group-hover:-translate-y-1">
+                    <div 
+                      key={award.key}
+                      onClick={() => handleOpenPodium(award.key)}
+                      className={`relative flex flex-col justify-between p-4 rounded-2xl bg-gradient-to-br ${award.gradient} border ${award.borderColor} hover:${award.borderColor.replace('/30', '/60')} shadow-lg hover:shadow-xl ${award.glowColor} h-[135px] cursor-pointer transition-all duration-300 hover:scale-[1.02]`}
+                    >
+                      {/* Top Row: Title & Icon */}
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <span className="text-[10px] font-black text-white/50 uppercase tracking-wider block">
+                            {award.title}
+                          </span>
+                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wide mt-1 border ${award.badgeBg}`}>
+                            {award.subtitle}
+                          </span>
+                        </div>
+                        <span className="text-2xl filter drop-shadow-md">{award.icon}</span>
+                      </div>
+
+                      {/* Bottom Row: Candidate selection */}
+                      <div className="mt-2 w-full flex items-center justify-between min-w-0">
                         {player ? (
-                          <div 
-                            onClick={() => handleOpenPodium(award.key)}
-                            className="flex flex-col items-center text-center cursor-pointer p-2 rounded-2xl bg-white/5 border border-white/10 w-full hover:border-white/20 transition-colors shadow-lg"
-                          >
+                          <div className="flex items-center gap-2.5 min-w-0 w-full">
                             {player.isCustom ? (
-                              <div className="w-12 h-12 rounded-xl bg-brand-lime/10 border border-brand-lime/20 flex items-center justify-center mb-1 shadow-inner">
-                                <Sparkles className="w-5 h-5 text-brand-lime" />
+                              <div className="w-8 h-8 rounded-lg bg-brand-lime/10 border border-brand-lime/20 flex items-center justify-center flex-shrink-0">
+                                <Sparkles className="w-4 h-4 text-brand-lime" />
                               </div>
                             ) : (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img
                                 src={teamFlagMap[player.teamCode]}
                                 alt={player.teamCode}
-                                className="w-12 h-8 object-cover rounded shadow border border-white/10 mb-1"
+                                className="w-8 h-5.5 object-cover rounded shadow border border-white/10 flex-shrink-0"
                               />
                             )}
-                            <span className="text-[11px] font-black text-white truncate max-w-full block leading-tight px-1">
-                              {player.name}
-                            </span>
-                            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-0.5">
-                              {player.teamCode}
-                            </span>
+                            <div className="min-w-0 flex-1">
+                              <span className="text-xs font-black text-white truncate block leading-tight">
+                                {player.name}
+                              </span>
+                              <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest block mt-0.5">
+                                {player.teamCode}
+                              </span>
+                            </div>
                           </div>
                         ) : (
-                          <button
-                            onClick={() => handleOpenPodium(award.key)}
-                            className="w-12 h-12 rounded-full border border-dashed border-white/20 hover:border-white/40 bg-white/5 flex items-center justify-center text-zinc-400 hover:text-white hover:scale-105 transition-all shadow-inner"
-                          >
-                            <User className="w-5 h-5 opacity-40" />
-                          </button>
+                          <div className="flex items-center gap-2 w-full text-zinc-400">
+                            <div className="w-8 h-8 rounded-full border border-dashed border-white/20 bg-white/5 flex items-center justify-center flex-shrink-0">
+                              <User className="w-4 h-4 opacity-40" />
+                            </div>
+                            <span className="text-[11px] font-bold tracking-wide italic opacity-40">
+                              Tap to select...
+                            </span>
+                          </div>
                         )}
-                      </div>
-
-                      {/* Physical Podium Pedestal block */}
-                      <div 
-                        onClick={() => handleOpenPodium(award.key)}
-                        className={`w-full rounded-2xl bg-gradient-to-t ${award.gradient} ${award.borderColor} border border-b-0 shadow-lg ${award.glowColor} ${heightClass} flex flex-col justify-end items-center pb-3 cursor-pointer relative group-hover:opacity-95 transition-opacity`}
-                      >
-                        {/* Glowing Accent Indicator */}
-                        <div className="absolute top-0 left-0 right-0 h-1 bg-white/10 rounded-t-2xl" />
-
-                        <span className="text-xl mb-1 filter drop-shadow-md">{award.icon}</span>
-                        <span className="text-[9px] font-black text-white uppercase tracking-wider px-1 text-center truncate w-full">
-                          {award.title}
-                        </span>
-                        <span className={`inline-flex items-center px-1 py-0.5 rounded-full text-[7px] font-black uppercase tracking-wide mt-1 border ${award.badgeBg}`}>
-                          {award.subtitle}
-                        </span>
                       </div>
                     </div>
                   );
                 })}
               </div>
-
-              {/* Action Footer Bar */}
               <div className="flex flex-col items-center gap-4 border-t border-white/5 pt-6 mt-8 w-full">
                 <div className="text-center w-full">
                   <p className="text-xs text-zinc-400">
