@@ -226,40 +226,32 @@ export default function Home() {
             {/* Subtle colorful strip at top */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-brand-gradient" />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full items-stretch">
-            {/* Box 1: MATCH TOTALS */}
-            <div className="px-5 py-4 bg-white/5 border border-white/5 rounded-2xl flex items-center justify-between gap-6">
-              <div className="flex-1">
-                <span className="text-[10px] text-zinc-500 uppercase font-black tracking-wider block">Group Matches</span>
-                <span className="text-2xl sm:text-3xl font-black text-brand-red font-mono block mt-1">72</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full items-stretch">
+              {/* Box 1: MATCH TOTALS */}
+              <div className="p-6 bg-white/5 border border-white/5 rounded-2xl flex items-center justify-between gap-6">
+                <div className="flex-1">
+                  <span className="text-[10px] text-zinc-500 uppercase font-black tracking-wider block">Group Matches</span>
+                  <span className="text-2xl sm:text-3xl font-black text-brand-red font-mono block mt-1">72</span>
+                </div>
+                <div className="h-10 w-[1px] bg-white/10" />
+                <div className="flex-1 text-right md:text-left">
+                  <span className="text-[10px] text-zinc-500 uppercase font-black tracking-wider block">Knockout Matches</span>
+                  <span className="text-2xl sm:text-3xl font-black text-brand-blue font-mono block mt-1">32</span>
+                </div>
               </div>
-              <div className="h-10 w-[1px] bg-white/10" />
-              <div className="flex-1 text-right md:text-left">
-                <span className="text-[10px] text-zinc-500 uppercase font-black tracking-wider block">Knockout Matches</span>
-                <span className="text-2xl sm:text-3xl font-black text-brand-blue font-mono block mt-1">32</span>
+
+              {/* Box 2: TOURNAMENT TIMELINE */}
+              <div className="p-6 bg-white/5 border border-white/5 rounded-2xl flex flex-col justify-center">
+                <span className="text-[10px] text-zinc-500 uppercase font-black tracking-wider block">World Cup Timeline</span>
+                <span className="text-sm sm:text-base font-black text-white font-sans mt-1">June 11 – July 19, 2026</span>
+                <span className="text-[10px] text-brand-lime font-bold mt-0.5">United States, Mexico & Canada</span>
               </div>
-            </div>
 
-            {/* Box 2: TOURNAMENT TIMELINE */}
-            <div className="px-5 py-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col justify-center">
-              <span className="text-[10px] text-zinc-500 uppercase font-black tracking-wider block">World Cup Timeline</span>
-              <span className="text-sm sm:text-base font-black text-white font-sans mt-1">June 11 – July 19, 2026</span>
-              <span className="text-[10px] text-brand-lime font-bold mt-0.5">United States, Mexico & Canada</span>
-            </div>
-
-            {/* Box 3: PREDICTION SCORE */}
-            <div className="px-5 py-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col justify-center">
-              <span className="text-[10px] text-zinc-500 uppercase font-black tracking-wider block">PREDICTION SCORE</span>
-              <span className="text-2xl sm:text-3xl font-black text-brand-yellow drop-shadow-[0_0_8px_rgba(250,204,21,0.5)] font-mono mt-1 flex items-baseline gap-1">
-                {liveScore} <span className="text-xs font-bold text-brand-yellow/80">PTS</span>
-              </span>
-              <span className="text-[9px] text-zinc-500 font-bold mt-0.5">
-                #1,405 Global Leaderboard Rank
-              </span>
+              {/* Box 3: BACKGROUND AMBIENT */}
+              <MusicPlayer />
             </div>
           </div>
         </div>
-      </div>
 
         {/* Navigation Tabs */}
         <div className="flex border-b border-white/10 gap-1 overflow-x-auto scrollbar-none">
@@ -372,8 +364,7 @@ export default function Home() {
         <p>© 2026 FIFA World Cup Predictor • Built for dynamic live bracket tracking</p>
       </footer>
 
-      {/* Floating Music Player Widget */}
-      <MusicPlayer />
+      {/* Background Audio Core Component is integrated in the header dashboard above */}
 
       {/* Floating Awards Ceremony / Share Button */}
       {matches['FINAL']?.isCompleted && (
