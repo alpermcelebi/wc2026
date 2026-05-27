@@ -37,6 +37,7 @@ interface TournamentStore {
     };
   }) => void;
   resetTournament: () => void;
+  loadPredictions: (matches: Record<string, Match>, awards: AwardsState) => void;
 }
 
 // Initial group standings calculation helper
@@ -479,6 +480,23 @@ export const useTournamentStore = create<TournamentStore>((set, get) => {
           goldenGlove: null,
           bestYoungPlayer: null
         }
+      });
+    },
+
+    loadPredictions: (matches, awards) => {
+      const initialGroups = calculateInitialGroups();
+      const newGroups = JSON.parse(JSON.stringify(initialGroups)) as Record<string, GroupState>;
+      
+      Object.keys(newGroups).forEach(groupId => {
+        recalculateGroup(groupId, matches, newGroups);
+      });
+      const newLadder = calculateThirdPlaceLadder(newGroups);
+      
+      set({
+        matches,
+        groups: newGroups,
+        thirdPlaceLadder: newLadder,
+        awards
       });
     }
   };

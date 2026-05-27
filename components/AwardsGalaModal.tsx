@@ -354,7 +354,7 @@ export default function AwardsGalaModal({
             <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end">
               {savedBracketCode ? (
                 <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold font-mono">
-                  ✓ Saved & Locked: {savedBracketCode}
+                  ✓ Saved: {savedBracketCode}
                 </div>
               ) : (
                 onSaveBracket && (

@@ -147,6 +147,15 @@ export const MatchCard: React.FC<MatchCardProps> = ({
     }
   };
 
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setTimeout(() => {
+      e.target.closest('.match-card-container')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }, 100);
+  };
+
   const showPenalties =
     isKnockout &&
     homeScore !== null &&
@@ -228,7 +237,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
     <div
       data-match-id={id}
       onClick={handleClick}
-      className={`relative group overflow-hidden ${compact ? 'rounded-xl p-2' : 'rounded-2xl p-4'} bg-[#0f0f1b]/60 border transition-all duration-300 backdrop-blur-md ${
+      className={`match-card-container relative group overflow-hidden ${compact ? 'rounded-xl p-2' : 'rounded-2xl p-4'} bg-[#0f0f1b]/60 border transition-all duration-300 backdrop-blur-md ${
         isFocused
           ? 'scale-[1.05] border-brand-purple/50 z-20 shadow-[0_0_20px_rgba(139,92,246,0.25)]'
           : isDimmed
@@ -279,6 +288,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
             onChange={handleHomeScoreChange}
             onKeyDown={handleInputKeyDown}
             onBlur={handleInputBlur}
+            onFocus={handleFocus}
             placeholder="-"
             className={`${compact ? 'w-9 h-7 text-sm' : 'w-12 h-9'} rounded-lg bg-white/5 border border-white/10 text-center font-bold text-white placeholder-white/20 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple outline-none transition-all disabled:opacity-30 disabled:cursor-not-allowed`}
           />
@@ -300,6 +310,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
             onChange={handleAwayScoreChange}
             onKeyDown={handleInputKeyDown}
             onBlur={handleInputBlur}
+            onFocus={handleFocus}
             placeholder="-"
             className={`${compact ? 'w-9 h-7 text-sm' : 'w-12 h-9'} rounded-lg bg-white/5 border border-white/10 text-center font-bold text-white placeholder-white/20 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple outline-none transition-all disabled:opacity-30 disabled:cursor-not-allowed`}
           />
@@ -323,6 +334,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
                 onChange={handleHomePensChange}
                 onKeyDown={handleInputKeyDown}
                 onBlur={handleInputBlur}
+                onFocus={handleFocus}
                 placeholder="0"
                 className={`${compact ? 'w-8 h-6 text-xs' : 'w-10 h-8'} rounded bg-brand-orange/10 border border-brand-orange/20 text-center font-bold text-brand-orange focus:border-brand-orange focus:ring-1 focus:ring-brand-orange outline-none disabled:opacity-30`}
               />
@@ -337,6 +349,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
                 onChange={handleAwayPensChange}
                 onKeyDown={handleInputKeyDown}
                 onBlur={handleInputBlur}
+                onFocus={handleFocus}
                 placeholder="0"
                 className={`${compact ? 'w-8 h-6 text-xs' : 'w-10 h-8'} rounded bg-brand-orange/10 border border-brand-orange/20 text-center font-bold text-brand-orange focus:border-brand-orange focus:ring-1 focus:ring-brand-orange outline-none disabled:opacity-30`}
               />

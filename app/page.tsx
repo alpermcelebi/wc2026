@@ -21,7 +21,7 @@ export default function Home() {
   const [savedBracketCode, setSavedBracketCode] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const { thirdPlaceLadder, resetTournament, matches, awards, setAwardPrediction, groups } = useTournamentStore();
+  const { thirdPlaceLadder, resetTournament, matches, awards, setAwardPrediction, groups, loadPredictions } = useTournamentStore();
 
   const prevGroupStageCompleteRef = useRef<boolean | null>(null);
   const prevFinalCompleteRef = useRef<boolean | null>(null);
@@ -52,6 +52,30 @@ export default function Home() {
     }
   }, []);
 
+  // Load predictions from LocalStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedPredsStr = localStorage.getItem('wc2026_live_predictions');
+      if (savedPredsStr) {
+        try {
+          const parsed = JSON.parse(savedPredsStr);
+          if (parsed && parsed.matches && parsed.awards) {
+            loadPredictions(parsed.matches, parsed.awards);
+          }
+        } catch (e) {
+          console.error('Failed to parse saved predictions:', e);
+        }
+      }
+    }
+  }, [loadPredictions]);
+
+  // Auto-save predictions to LocalStorage on change
+  useEffect(() => {
+    if (typeof window !== 'undefined' && Object.keys(matches).length > 0) {
+      localStorage.setItem('wc2026_live_predictions', JSON.stringify({ matches, awards }));
+    }
+  }, [matches, awards]);
+
   useEffect(() => {
     if (prevGroupStageCompleteRef.current === null) {
       prevGroupStageCompleteRef.current = isGroupStageComplete;
@@ -79,10 +103,11 @@ export default function Home() {
   }, [isFinalComplete]);
 
   const handleReset = () => {
-    if (window.confirm('Are you sure you want to reset all your predictions? This will also unlock your saved bracket.')) {
+    if (window.confirm('Are you sure you want to reset all your predictions?')) {
       resetTournament();
       setSavedBracketCode(null);
       localStorage.removeItem('saved_bracket_code');
+      localStorage.removeItem('wc2026_live_predictions');
     }
   };
 
@@ -118,7 +143,7 @@ export default function Home() {
     }
   };
 
-  const isLocked = !!savedBracketCode;
+  const isLocked = false;
 
   return (
     <div className="relative min-h-screen bg-[#06060c] bg-grid-pattern text-zinc-100 flex flex-col antialiased">
@@ -196,31 +221,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-
-        {isLocked && (
-          <div className="relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-emerald-500/5 backdrop-blur-md p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg shadow-emerald-500/5 animate-fadeIn">
-            <div className="flex items-center gap-3">
-              <span className="text-xl">🔒</span>
-              <div>
-                <p className="text-sm font-black text-white uppercase tracking-wider">Predictions Saved & Locked</p>
-                <p className="text-xs text-zinc-400 mt-0.5">
-                  Your predictions are saved under bracket code <span className="font-mono font-bold text-brand-lime">{savedBracketCode}</span>. Interactive input fields are set to read-only view.
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                if (window.confirm('Would you like to unlock your predictions to make edits? You can save again after editing.')) {
-                  setSavedBracketCode(null);
-                  localStorage.removeItem('saved_bracket_code');
-                }
-              }}
-              className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold text-xs sm:text-sm transition-all flex-shrink-0"
-            >
-              🔓 Unlock & Edit Bracket
-            </button>
-          </div>
-        )}
 
         {/* Navigation Tabs */}
         <div className="flex border-b border-white/10 gap-1 overflow-x-auto scrollbar-none">
