@@ -13,6 +13,7 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const [downloading, setDownloading] = useState(false);
+  const [sharingPlatform, setSharingPlatform] = useState<'twitter' | 'whatsapp' | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -68,13 +69,43 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
 
   const shareText = "🏆 İşte benim 2026 Dünya Kupası tahminlerim! Şampiyonumu seçtim, ödülleri belirledim. Sen de kendi turnuva ağacını kur ve kupon kodunu alarak benimle kapış!";
 
-  const twitterIntent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-    shareText
-  )}&url=${encodeURIComponent(shareUrl)}`;
+  const handleShare = async (e: React.MouseEvent, platform: 'twitter' | 'whatsapp') => {
+    e.preventDefault();
+    setSharingPlatform(platform);
+    
+    const shareTextWithUrl = `${shareText}\n\n${shareUrl}`;
+    
+    try {
+      const response = await fetch(ogImageUrl);
+      const blob = await response.blob();
+      const imageFile = new File([blob], "wc2026-predictions.png", { type: "image/png" });
 
-  const whatsappIntent = `https://api.whatsapp.com/send?text=${encodeURIComponent(
-    `${shareText}\n\n${shareUrl}`
-  )}`;
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+        try {
+          await navigator.share({
+            title: "FIFA World Cup 2026 Predictions",
+            text: shareText,
+            url: shareUrl,
+            files: [imageFile],
+          });
+          setSharingPlatform(null);
+          return;
+        } catch (error) {
+          console.log("Native share cancelled or failed:", error);
+        }
+      }
+    } catch (err) {
+      console.error("Share compilation failed:", err);
+    }
+
+    // Fallback: open deep link / web intent
+    const intentUrl = platform === 'twitter' 
+      ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`
+      : `https://api.whatsapp.com/send?text=${encodeURIComponent(shareTextWithUrl)}`;
+    
+    window.open(intentUrl, '_blank', 'noopener,noreferrer');
+    setSharingPlatform(null);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -203,28 +234,36 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
           {/* ROW 3: THE DIRECT SOCIAL MEDIA DIRECTORIES */}
           <div className="grid grid-cols-2 gap-4 w-full">
             {/* Twitter/X */}
-            <a
-              href={twitterIntent}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 font-black text-sm text-white transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
+            <button
+              onClick={(e) => handleShare(e, 'twitter')}
+              disabled={sharingPlatform !== null || downloading}
+              className="flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 font-black text-sm text-white transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
             >
-              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-              </svg>
-              𝕏 Share on X
-            </a>
+              {sharingPlatform === 'twitter' ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0" />
+              ) : (
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+              )}
+              Share on X
+            </button>
 
             {/* WhatsApp */}
-            <a
-              href={whatsappIntent}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 font-black text-sm text-emerald-400 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
+            <button
+              onClick={(e) => handleShare(e, 'whatsapp')}
+              disabled={sharingPlatform !== null || downloading}
+              className="flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 font-black text-sm text-emerald-400 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
             >
-              <span className="text-base">🟢</span>
+              {sharingPlatform === 'whatsapp' ? (
+                <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+              ) : (
+                <svg className="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24">
+                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.59 2.019 14.12 1.012 11.996 1.012c-5.438 0-9.863 4.373-9.867 9.801-.001 1.745.485 3.45 1.407 4.966L2.5 21.844l4.147-1.09zM17.186 14.1c-.287-.143-1.696-.837-1.959-.933-.262-.095-.453-.143-.644.143-.191.286-.74.933-.907 1.122-.167.19-.334.214-.621.071-.287-.143-1.21-.446-2.305-1.424-.853-.76-1.429-1.698-1.597-1.984-.167-.286-.018-.441.125-.583.13-.127.287-.333.43-.5.143-.167.19-.286.287-.476.095-.19.047-.357-.024-.5-.071-.143-.644-1.55-.882-2.122-.232-.559-.467-.483-.644-.492-.167-.008-.358-.01-.55-.01s-.502.072-.765.357c-.263.286-1.004.981-1.004 2.39s1.028 2.775 1.171 2.966c.143.19 2.025 3.093 4.906 4.336.685.296 1.22.473 1.637.605.689.219 1.317.188 1.813.114.553-.083 1.696-.692 1.935-1.362.24-.67.24-1.242.167-1.362-.072-.12-.263-.19-.55-.333z" />
+                </svg>
+              )}
               WhatsApp
-            </a>
+            </button>
           </div>
         </div>
       </div>
