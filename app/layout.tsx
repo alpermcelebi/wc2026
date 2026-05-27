@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FIFA World Cup 2026 - Bracket Predictor",
+  title: "WC2026 - Bracket Predictor",
   description: "Predict the full 48-team World Cup 2026 group stages, knockout brackets, and individual awards! Save your predictions and track your global leaderboard rank live.",
 };
 

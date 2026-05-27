@@ -148,19 +148,29 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    // Prevent default native browser jumping if applicable
     const card = e.target.closest('.match-card-container');
     if (!card) return;
 
-    const currentX = window.scrollX || window.pageXOffset;
-    const cardRect = card.getBoundingClientRect();
-    const targetY = cardRect.top + window.scrollY - 120; // 120px offset to keep team names perfectly visible above keyboard
+    // Let the browser process the focus switch first
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        // 1. Grab the current absolute viewport X position to lock it
+        const currentX = window.scrollX || window.pageXOffset;
+        
+        // 2. Compute coordinates NOW, when the keyboard state is 100% stable
+        const cardRect = card.getBoundingClientRect();
+        const absoluteCardTop = cardRect.top + window.scrollY;
+        
+        // 3. Center the match card safely in the available upper viewport
+        const stableTargetY = absoluteCardTop - 100; 
 
-    // Force scroll immediately to target, matching the keyboard animation speed
-    window.scrollTo({
-      top: targetY,
-      left: currentX,
-      behavior: 'smooth'
+        // 4. Fire a single, definitive scroll command
+        window.scrollTo({
+          top: stableTargetY,
+          left: currentX,
+          behavior: 'smooth'
+        });
+      }, 200); // 200ms ensures the keyboard sizing update is entirely finished
     });
   };
 

@@ -214,18 +214,20 @@ export const KnockoutBracketView: React.FC<KnockoutBracketViewProps> = ({ isLock
         const nextInput = bracketRef.current?.querySelector(`[data-match-id="${nextIncompleteId}"] input`) as HTMLInputElement | null;
         if (nextInput) {
           nextInput.focus();
-          setTimeout(() => {
-            const currentX = window.scrollX || window.pageXOffset;
-            const card = nextInput.closest('.match-card-container') || nextInput;
-            const cardRect = card.getBoundingClientRect();
-            const targetY = cardRect.top + window.scrollY - (window.innerHeight / 3);
-            
-            window.scrollTo({
-              top: targetY,
-              left: currentX,
-              behavior: 'smooth'
-            });
-          }, 150);
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              const currentX = window.scrollX || window.pageXOffset;
+              const card = nextInput.closest('.match-card-container') || nextInput;
+              const cardRect = card.getBoundingClientRect();
+              const targetY = cardRect.top + window.scrollY - 100;
+              
+              window.scrollTo({
+                top: targetY,
+                left: currentX,
+                behavior: 'smooth'
+              });
+            }, 200);
+          });
         }
       }
     }
