@@ -1,26 +1,138 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --background: #06060c;
+  --foreground: #f4f4f5;
+  --card: #0f0f1b;
+  --card-foreground: #f4f4f5;
+  --popover: #06060c;
+  --popover-foreground: #f4f4f5;
+  --primary: #e61b23; /* Brand Red */
+  --primary-foreground: #ffffff;
+  --secondary: #1a1a3a;
+  --secondary-foreground: #f4f4f5;
+  --muted: #111124;
+  --muted-foreground: #a1a1aa;
+  --accent: #2c1a4d;
+  --accent-foreground: #f4f4f5;
+  --destructive: #ef4444;
+  --destructive-foreground: #f4f4f5;
+  --border: #22223b;
+  --input: #15152a;
+  --ring: #8b5cf6; /* Brand Purple */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Brand Colors from image */
+  --brand-red: #e61b23;
+  --brand-purple: #8b5cf6;
+  --brand-blue: #2563eb;
+  --brand-lime: #b6f124;
+  --brand-orange: #f97316;
+  --brand-turquoise: #2dd4bf;
+  --brand-yellow: #facc15;
 }
 
 body {
-  background: var(--background);
+  background-color: #06060c;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  overflow-y: scroll;
+}
+
+/* Custom Scrollbars in FIFA Theme */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 9999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: linear-gradient(to right, var(--brand-red), var(--brand-purple));
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to right, var(--brand-purple), var(--brand-blue));
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Background Pattern */
+.bg-grid-pattern {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+}
+
+/* Brand Utilities */
+.bg-brand-gradient {
+  background: linear-gradient(135deg, var(--brand-red) 0%, var(--brand-purple) 35%, var(--brand-blue) 70%, var(--brand-turquoise) 100%);
+}
+
+.text-brand-gradient {
+  background: linear-gradient(135deg, #ffffff 0%, var(--brand-purple) 40%, var(--brand-blue) 70%, var(--brand-turquoise) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-rainbow-gradient {
+  background: linear-gradient(90deg, var(--brand-red), var(--brand-purple), var(--brand-blue), var(--brand-lime));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.border-brand-glow {
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);
+}
+
+.border-brand-glow:hover {
+  box-shadow: 0 0 25px rgba(230, 27, 35, 0.25);
+  border-color: rgba(230, 27, 35, 0.4);
+}
+
+/* Team Advance Slide-In Animation */
+@keyframes slideFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slideFadeIn {
+  animation: slideFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

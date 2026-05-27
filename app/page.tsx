@@ -1,65 +1,375 @@
-import Image from "next/image";
+'use client';
+
+import React, { useState, useEffect, useRef } from 'react';
+import { useTournamentStore } from '../store/useTournamentStore';
+import { GroupStageView } from '../components/GroupStageView';
+import { KnockoutBracketView } from '../components/KnockoutBracketView';
+import { GroupTable } from '../components/GroupTable';
+import { Trophy, RefreshCw, Layers, GitBranch, Table, Share2, TrendingUp } from 'lucide-react';
+import { MusicPlayer } from '../components/MusicPlayer';
+import { AwardsPredictionView } from '../components/AwardsPredictionView';
+import ShareModal from '../components/ShareModal';
+import AwardsGalaModal from '../components/AwardsGalaModal';
+import { TrackScoreView } from '../components/TrackScoreView';
+import { serializePredictions } from '../utils/shareCompression';
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState<'groups' | 'bracket' | 'thirds' | 'awards' | 'track'>('groups');
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isGalaOpen, setIsGalaOpen] = useState(false);
+  
+  const [savedBracketCode, setSavedBracketCode] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const { thirdPlaceLadder, resetTournament, matches, awards, setAwardPrediction, groups } = useTournamentStore();
+
+  const prevGroupStageCompleteRef = useRef<boolean | null>(null);
+  const prevFinalCompleteRef = useRef<boolean | null>(null);
+
+  const isGroupStageComplete = Object.values(matches)
+    .filter(m => m.stage === 'group')
+    .every(m => m.isCompleted);
+
+  const isFinalComplete = !!matches['FINAL']?.isCompleted;
+
+  // Count how many teams have filled slots in R32
+  const qualifiedTeamsCount = Object.values(matches)
+    .filter(m => m.stage === 'r32')
+    .reduce((acc, m) => {
+      let count = acc;
+      if (m.homeTeam) count++;
+      if (m.awayTeam) count++;
+      return count;
+    }, 0);
+
+  // Sync saved bracket code on client mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const code = localStorage.getItem('saved_bracket_code');
+      if (code) {
+        setSavedBracketCode(code);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (prevGroupStageCompleteRef.current === null) {
+      prevGroupStageCompleteRef.current = isGroupStageComplete;
+      return;
+    }
+
+    if (isGroupStageComplete && !prevGroupStageCompleteRef.current) {
+      setActiveTab('bracket');
+    }
+
+    prevGroupStageCompleteRef.current = isGroupStageComplete;
+  }, [isGroupStageComplete]);
+
+  useEffect(() => {
+    if (prevFinalCompleteRef.current === null) {
+      prevFinalCompleteRef.current = isFinalComplete;
+      return;
+    }
+
+    if (isFinalComplete && !prevFinalCompleteRef.current) {
+      setIsGalaOpen(true);
+    }
+
+    prevFinalCompleteRef.current = isFinalComplete;
+  }, [isFinalComplete]);
+
+  const handleReset = () => {
+    if (window.confirm('Are you sure you want to reset all your predictions? This will also unlock your saved bracket.')) {
+      resetTournament();
+      setSavedBracketCode(null);
+      localStorage.removeItem('saved_bracket_code');
+    }
+  };
+
+  const handleSaveBracket = async () => {
+    setIsSaving(true);
+    try {
+      const res = await fetch('/api/bracket', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          predictions: { matches, awards }
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.code) {
+        setSavedBracketCode(data.code);
+        localStorage.setItem('saved_bracket_code', data.code);
+        
+        // Handle mock mode fallback (saving state locally in LocalStorage)
+        if (data.mock) {
+          localStorage.setItem(`local_bracket_${data.code}`, JSON.stringify({ matches, awards }));
+        }
+      } else {
+        alert(data.error || 'Failed to save predictions.');
+      }
+    } catch (err) {
+      console.error('Error saving bracket:', err);
+      alert('Network connection error. Failed to save predictions.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const isLocked = !!savedBracketCode;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="relative min-h-screen bg-[#06060c] bg-grid-pattern text-zinc-100 flex flex-col antialiased">
+      {/* Ambient background glow */}
+      <div className="absolute top-0 left-1/4 -z-10 w-[500px] h-[500px] rounded-full bg-brand-red/10 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 -z-10 w-[600px] h-[600px] rounded-full bg-brand-blue/5 blur-[150px] pointer-events-none" />
+      <div className="absolute top-1/3 right-10 -z-10 w-[300px] h-[300px] rounded-full bg-brand-purple/10 blur-[100px] pointer-events-none" />
+
+      {/* Main Top Header */}
+      <header className="sticky top-0 z-30 bg-[#06060c]/40 backdrop-blur-md">
+        {/* Colorful bottom border for header */}
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-gradient" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-red via-brand-purple to-brand-blue flex items-center justify-center shadow-lg shadow-brand-red/20">
+              <Trophy className="w-5 h-5 text-white font-bold" />
+            </div>
+            <div>
+              <h1 className="font-black text-xl tracking-tight text-white leading-none">
+                WORLD CUP 2026
+              </h1>
+              <p className="text-[9px] font-black text-brand-lime uppercase tracking-widest leading-none mt-1">
+                Bracket Predictor
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleReset}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400 font-semibold text-xs transition-all duration-300"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Reset Predictor</span>
+            </button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      </header>
+
+      {/* Main Dashboard Layout */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* Banner Informational Card: Tournament Overview Bar */}
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f0f1b]/80 via-[#130f24]/85 to-[#0b101c]/80 backdrop-blur-md p-6 sm:p-8 shadow-xl">
+          {/* Subtle colorful strip at top */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-brand-gradient" />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full items-stretch">
+            {/* Box 1: MATCH TOTALS */}
+            <div className="px-5 py-4 bg-white/5 border border-white/5 rounded-2xl flex items-center justify-between gap-6">
+              <div className="flex-1">
+                <span className="text-[10px] text-zinc-500 uppercase font-black tracking-wider block">Group Matches</span>
+                <span className="text-2xl sm:text-3xl font-black text-brand-red font-mono block mt-1">72</span>
+              </div>
+              <div className="h-10 w-[1px] bg-white/10" />
+              <div className="flex-1 text-right md:text-left">
+                <span className="text-[10px] text-zinc-500 uppercase font-black tracking-wider block">Knockout Matches</span>
+                <span className="text-2xl sm:text-3xl font-black text-brand-blue font-mono block mt-1">32</span>
+              </div>
+            </div>
+
+            {/* Box 2: TOURNAMENT TIMELINE */}
+            <div className="px-5 py-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col justify-center">
+              <span className="text-[10px] text-zinc-500 uppercase font-black tracking-wider block">World Cup Timeline</span>
+              <span className="text-sm sm:text-base font-black text-white font-sans mt-1">June 11 – July 19, 2026</span>
+              <span className="text-[10px] text-brand-lime font-bold mt-0.5">United States, Mexico & Canada</span>
+            </div>
+
+            {/* Box 3: ADVANCING TEAMS */}
+            <div className="px-5 py-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col justify-center">
+              <span className="text-[10px] text-zinc-500 uppercase font-black tracking-wider block">Advancing Teams</span>
+              <span className="text-2xl sm:text-3xl font-black text-brand-purple font-mono mt-1">
+                {qualifiedTeamsCount} <span className="text-xs text-zinc-500 font-bold">/ 32</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {isLocked && (
+          <div className="relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-emerald-500/5 backdrop-blur-md p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg shadow-emerald-500/5 animate-fadeIn">
+            <div className="flex items-center gap-3">
+              <span className="text-xl">🔒</span>
+              <div>
+                <p className="text-sm font-black text-white uppercase tracking-wider">Predictions Saved & Locked</p>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Your predictions are saved under bracket code <span className="font-mono font-bold text-brand-lime">{savedBracketCode}</span>. Interactive input fields are set to read-only view.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                if (window.confirm('Would you like to unlock your predictions to make edits? You can save again after editing.')) {
+                  setSavedBracketCode(null);
+                  localStorage.removeItem('saved_bracket_code');
+                }
+              }}
+              className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold text-xs sm:text-sm transition-all flex-shrink-0"
+            >
+              🔓 Unlock & Edit Bracket
+            </button>
+          </div>
+        )}
+
+        {/* Navigation Tabs */}
+        <div className="flex border-b border-white/10 gap-1 overflow-x-auto scrollbar-none">
+          <button
+            onClick={() => setActiveTab('groups')}
+            className={`flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-xs sm:text-sm transition-all duration-300 ${activeTab === 'groups'
+                ? 'border-brand-red text-brand-red bg-brand-red/5'
+                : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
+              }`}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+            <Layers className="w-4 h-4" />
+            Group Stage
+          </button>
+          <button
+            onClick={() => setActiveTab('bracket')}
+            className={`flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-xs sm:text-sm transition-all duration-300 ${activeTab === 'bracket'
+                ? 'border-brand-purple text-brand-purple bg-brand-purple/5'
+                : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
+              }`}
+          >
+            <GitBranch className="w-4 h-4" />
+            Knockout Bracket
+          </button>
+
+          <button
+            onClick={() => setActiveTab('awards')}
+            className={`flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-xs sm:text-sm transition-all duration-300 ${activeTab === 'awards'
+                ? 'border-brand-lime text-brand-lime bg-brand-lime/5'
+                : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
+              }`}
+          >
+            <Trophy className="w-4 h-4" />
+            Individual Awards
+          </button>
+
+          <button
+            onClick={() => setActiveTab('track')}
+            className={`flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-xs sm:text-sm transition-all duration-300 ${activeTab === 'track'
+                ? 'border-brand-purple text-brand-purple bg-brand-purple/5'
+                : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
+              }`}
+          >
+            <TrendingUp className="w-4 h-4" />
+            Track My Score
+          </button>
+        </div>
+
+        {/* Tab Contents */}
+        <div className="mt-4">
+          {activeTab === 'groups' && (
+            <GroupStageView 
+              onShowThirds={() => setActiveTab('thirds')} 
+              isLocked={isLocked} 
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          )}
+
+          {activeTab === 'bracket' && (
+            <KnockoutBracketView 
+              isLocked={isLocked} 
+            />
+          )}
+
+          {activeTab === 'thirds' && (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6 max-w-3xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                  <div>
+                    <h3 className="font-black text-lg text-white uppercase tracking-wide">
+                      Third-Place Standings Ladder
+                    </h3>
+                    <p className="text-xs text-zinc-400 leading-relaxed mt-1">
+                      After group matches are played, the 3rd-placed team from each of the 12 groups is ranked here. The **top 8 teams** qualify for the Round of 32.
+                      Ties are broken by: **Points &gt; Goal Difference &gt; Goals For &gt; Group ID**.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('groups')}
+                    className="flex-shrink-0 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold text-xs transition-all duration-300 flex items-center gap-1.5 self-start sm:self-auto shadow-md"
+                  >
+                    ← Back to Groups
+                  </button>
+                </div>
+                {thirdPlaceLadder.length === 0 ? (
+                  <div className="text-center py-12 text-zinc-500 text-sm border border-dashed border-white/10 rounded-xl">
+                    Predict some group stage scores to populate the third-place ladder!
+                  </div>
+                ) : (
+                  <GroupTable standings={thirdPlaceLadder} isThirdPlaceLadder={true} />
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'awards' && (
+            <AwardsPredictionView 
+              isLocked={isLocked} 
+            />
+          )}
+
+          {activeTab === 'track' && (
+            <TrackScoreView 
+              initialCode={savedBracketCode} 
+            />
+          )}
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-white/5 bg-zinc-950/40 py-6 mt-16 text-center text-xs text-zinc-600">
+        <p>© 2026 FIFA World Cup Predictor • Built for dynamic live bracket tracking</p>
+      </footer>
+
+      {/* Floating Music Player Widget */}
+      <MusicPlayer />
+
+      {/* Floating Awards Ceremony / Share Button */}
+      {matches['FINAL']?.isCompleted && (
+        <button
+          onClick={() => setIsGalaOpen(true)}
+          className="fixed bottom-6 right-20 z-40 flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-full bg-gradient-to-r from-amber-500 via-brand-purple to-brand-blue hover:opacity-95 text-white font-black text-sm shadow-xl shadow-brand-purple/30 hover:scale-105 active:scale-95 transition-all duration-300 animate-fadeIn"
+        >
+          <Trophy className="w-4 h-4 animate-pulse text-amber-300" />
+          Awards Ceremony & Share
+        </button>
+      )}
+
+      {/* Awards Gala Modal */}
+      <AwardsGalaModal
+        isOpen={isGalaOpen}
+        onClose={() => setIsGalaOpen(false)}
+        awards={awards}
+        setAwardPrediction={setAwardPrediction}
+        groups={groups}
+        isLocked={isLocked}
+        savedBracketCode={savedBracketCode}
+        onSaveBracket={handleSaveBracket}
+        isSaving={isSaving}
+        onGeneratePoster={() => {
+          setIsGalaOpen(false);
+          setIsShareOpen(true);
+        }}
+      />
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        shareCode={isShareOpen ? serializePredictions(matches, awards) : ''}
+      />
     </div>
   );
 }
