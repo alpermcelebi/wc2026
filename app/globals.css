@@ -31,6 +31,12 @@
   --brand-yellow: #facc15;
 }
 
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden; /* ABSOLUTELY CRITICAL: Prevents any horizontal page sliding/scrolling */
+  position: relative;
+}
+
 body {
   background-color: #06060c;
   color: var(--foreground);

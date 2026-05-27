@@ -221,9 +221,10 @@ export default function Home() {
       {/* Main Dashboard Layout */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Banner Informational Card: Tournament Overview Bar */}
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f0f1b]/80 via-[#130f24]/85 to-[#0b101c]/80 backdrop-blur-md p-6 sm:p-8 shadow-xl">
-          {/* Subtle colorful strip at top */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-brand-gradient" />
+        <div className="w-full px-4 box-border max-w-full">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f0f1b]/80 via-[#130f24]/85 to-[#0b101c]/80 backdrop-blur-md p-6 sm:p-8 shadow-xl">
+            {/* Subtle colorful strip at top */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-brand-gradient" />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full items-stretch">
             {/* Box 1: MATCH TOTALS */}
@@ -258,6 +259,7 @@ export default function Home() {
             </div>
           </div>
         </div>
+      </div>
 
         {/* Navigation Tabs */}
         <div className="flex border-b border-white/10 gap-1 overflow-x-auto scrollbar-none">
@@ -306,7 +308,7 @@ export default function Home() {
         </div>
 
         {/* Tab Contents */}
-        <div className="mt-4">
+        <div className="mt-4 w-full max-w-full overflow-x-auto">
           {activeTab === 'groups' && (
             <GroupStageView 
               onShowThirds={() => setActiveTab('thirds')} 

@@ -533,7 +533,7 @@ export async function GET(request: NextRequest) {
             letterSpacing: '2px',
             zIndex: 10,
           }}>
-            <span>Generated on DunyaKupasiTahmin.com</span>
+            <span>alpermcelebi • WC 2026 Predictor</span>
             <span>FIFA World Cup 2026™</span>
           </div>
         </div>

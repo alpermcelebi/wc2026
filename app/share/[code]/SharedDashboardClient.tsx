@@ -120,9 +120,10 @@ export default function SharedDashboardClient({ code }: SharedDashboardClientPro
       {/* Main Dashboard Layout */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Shared View Warning Banner */}
-        <div className="relative overflow-hidden rounded-3xl border border-brand-purple/30 bg-gradient-to-r from-[#170e2b]/80 to-[#0c0d1c]/80 backdrop-blur-md p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
-          <div className="space-y-1.5">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-brand-purple/20 text-brand-purple border border-brand-purple/30">
+        <div className="w-full px-4 box-border max-w-full">
+          <div className="relative overflow-hidden rounded-3xl border border-brand-purple/30 bg-gradient-to-r from-[#170e2b]/80 to-[#0c0d1c]/80 backdrop-blur-md p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
+            <div className="space-y-1.5">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-brand-purple/20 text-brand-purple border border-brand-purple/30">
               Shared Bracket View
             </span>
             <h2 className="text-lg sm:text-xl font-black text-white leading-tight">
@@ -142,6 +143,7 @@ export default function SharedDashboardClient({ code }: SharedDashboardClientPro
             </button>
           </div>
         </div>
+      </div>
 
         {/* Navigation Tabs */}
         <div className="flex border-b border-white/10 gap-1 overflow-x-auto scrollbar-none">
@@ -198,7 +200,7 @@ export default function SharedDashboardClient({ code }: SharedDashboardClientPro
         </div>
 
         {/* Tab Contents */}
-        <div className="mt-4">
+        <div className="mt-4 w-full max-w-full overflow-x-auto">
           {activeTab === 'groups' && <GroupStageView onShowThirds={() => setActiveTab('thirds')} />}
 
           {activeTab === 'bracket' && <KnockoutBracketView />}
