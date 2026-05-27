@@ -178,7 +178,7 @@ export const KnockoutBracketView: React.FC<KnockoutBracketViewProps> = ({ isLock
 
             const firstInput = bracketRef.current?.querySelector(`[data-match-id="${nextMatchId}"] input`) as HTMLInputElement | null;
             if (firstInput) {
-              firstInput.focus();
+              firstInput.focus({ preventScroll: true });
               requestAnimationFrame(() => {
                 setTimeout(() => {
                   const currentX = window.scrollX || window.pageXOffset;
@@ -227,7 +227,7 @@ export const KnockoutBracketView: React.FC<KnockoutBracketViewProps> = ({ isLock
       if (nextIncompleteId) {
         const nextInput = bracketRef.current?.querySelector(`[data-match-id="${nextIncompleteId}"] input`) as HTMLInputElement | null;
         if (nextInput) {
-          nextInput.focus();
+          nextInput.focus({ preventScroll: true });
           requestAnimationFrame(() => {
             setTimeout(() => {
               const currentX = window.scrollX || window.pageXOffset;
@@ -272,7 +272,7 @@ export const KnockoutBracketView: React.FC<KnockoutBracketViewProps> = ({ isLock
     setTimeout(() => {
       const input = bracketRef.current?.querySelector(`[data-match-id="${matchId}"] input`) as HTMLInputElement | null;
       if (input) {
-        input.focus();
+        input.focus({ preventScroll: true });
       }
     }, 100);
   };

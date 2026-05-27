@@ -46,7 +46,7 @@ export const GroupStageView: React.FC<GroupStageViewProps> = ({ onShowThirds, is
           setTimeout(() => {
             const nextInput = document.querySelector(`[data-match-id="${nextIncompleteId}"] input`) as HTMLInputElement | null;
             if (nextInput) {
-              nextInput.focus();
+              nextInput.focus({ preventScroll: true });
               const currentX = window.scrollX || window.pageXOffset;
               const card = nextInput.closest('.match-card-container') || nextInput;
               const cardRect = card.getBoundingClientRect();
