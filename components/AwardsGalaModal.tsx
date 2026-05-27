@@ -270,8 +270,8 @@ export default function AwardsGalaModal({
         <div className="p-4 md:p-8 flex-1 overflow-y-auto scrollbar-thin relative flex flex-col gap-8">
           
           {activePodiumKey && activeAwardConfig ? (
-            {/* AUTOCOMPLETE SELECTION PANEL (Replaces Podium View to prevent overlap) */}
             <div className="flex-1 flex flex-col animate-fadeIn">
+              {/* AUTOCOMPLETE SELECTION PANEL (Replaces Podium View to prevent overlap) */}
               <div className="space-y-4 flex-1 flex flex-col overflow-hidden">
                 {/* Overlay Header */}
                 <div className="flex items-center justify-between border-b border-white/5 pb-4">

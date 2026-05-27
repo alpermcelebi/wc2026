@@ -38,6 +38,8 @@ export interface SharePayload {
     gbName: string;
     gbTeam: string;
     gtName: string;
+    gtTeam: string;
+    ggName: string;
     ggTeam: string;
     byName: string;
     byTeam: string;
