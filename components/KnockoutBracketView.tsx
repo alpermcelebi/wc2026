@@ -179,6 +179,20 @@ export const KnockoutBracketView: React.FC<KnockoutBracketViewProps> = ({ isLock
             const firstInput = bracketRef.current?.querySelector(`[data-match-id="${nextMatchId}"] input`) as HTMLInputElement | null;
             if (firstInput) {
               firstInput.focus();
+              requestAnimationFrame(() => {
+                setTimeout(() => {
+                  const currentX = window.scrollX || window.pageXOffset;
+                  const card = firstInput.closest('.match-card-container') || firstInput;
+                  const cardRect = card.getBoundingClientRect();
+                  const targetY = cardRect.top + window.scrollY - 100;
+
+                  window.scrollTo({
+                    top: targetY,
+                    left: currentX,
+                    behavior: 'smooth'
+                  });
+                }, 200);
+              });
             }
           }, 150);
         }

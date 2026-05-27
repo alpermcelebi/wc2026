@@ -3,6 +3,8 @@
 import React from 'react';
 import { Match } from '../types/tournament';
 
+let previousMatchCardId: string | null = null;
+
 interface MatchCardProps {
   match: Match;
   onScoreChange: (
@@ -148,8 +150,15 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    const card = e.target.closest('.match-card-container');
+    const card = e.target.closest('.match-card-container') as HTMLElement | null;
     if (!card) return;
+
+    const currentMatchCardId = card.dataset.matchId;
+
+    if (currentMatchCardId && currentMatchCardId === previousMatchCardId) {
+      // ABORT Custom Scroll - Stay stable within the same card.
+      return;
+    }
 
     // Let the browser process the focus switch first
     requestAnimationFrame(() => {
@@ -172,6 +181,10 @@ export const MatchCard: React.FC<MatchCardProps> = ({
         });
       }, 200); // 200ms ensures the keyboard sizing update is entirely finished
     });
+
+    if (currentMatchCardId) {
+      previousMatchCardId = currentMatchCardId;
+    }
   };
 
   const showPenalties =
