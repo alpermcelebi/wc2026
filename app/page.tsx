@@ -12,7 +12,7 @@ import ShareModal from '../components/ShareModal';
 import AwardsGalaModal from '../components/AwardsGalaModal';
 import { TrackScoreView } from '../components/TrackScoreView';
 import { serializePredictions } from '../utils/shareCompression';
-import { calculateBracketScore } from '../utils/scoringEngine';
+import { calculateBracketScore, generateMockActualResults } from '../utils/scoringEngine';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'groups' | 'bracket' | 'thirds' | 'awards' | 'track'>('groups');
@@ -22,7 +22,7 @@ export default function Home() {
   const [savedBracketCode, setSavedBracketCode] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const { thirdPlaceLadder, resetTournament, matches, awards, setAwardPrediction, groups, loadPredictions } = useTournamentStore();
+  const { thirdPlaceLadder, resetTournament, matches, awards, setAwardPrediction, groups, loadPredictions, trackedPredictions, setTrackedPredictions, compareMode } = useTournamentStore();
 
   const prevGroupStageCompleteRef = useRef<boolean | null>(null);
   const prevFinalCompleteRef = useRef<boolean | null>(null);
@@ -34,31 +34,43 @@ export default function Home() {
   const isFinalComplete = !!matches['FINAL']?.isCompleted;
 
 
-  // Compute live prediction score against saved predictions
+  // Compute live prediction score dynamically from tracked predictions and compareMode
   const liveScore = useMemo(() => {
-    if (!savedBracketCode || typeof window === 'undefined') return 0;
-    const localData = localStorage.getItem(`local_bracket_${savedBracketCode}`);
-    if (localData) {
-      try {
-        const parsed = JSON.parse(localData);
-        if (parsed && parsed.matches && parsed.awards) {
-          const res = calculateBracketScore(parsed, {
-            matches,
-            awards: {
-              goldenBall: null,
-              goldenBoot: null,
-              goldenGlove: null,
-              bestYoungPlayer: null
-            }
-          });
-          return res.totalScore;
+    let preds = trackedPredictions;
+    if (!preds && savedBracketCode && typeof window !== 'undefined') {
+      const localData = localStorage.getItem(`local_bracket_${savedBracketCode}`);
+      if (localData) {
+        try {
+          const parsed = JSON.parse(localData);
+          if (parsed && parsed.matches && parsed.awards) {
+            preds = parsed;
+          }
+        } catch (e) {
+          console.error('Error parsing local bracket fallback:', e);
         }
-      } catch (e) {
-        console.error('Error calculating live score in header:', e);
       }
     }
-    return 0;
-  }, [savedBracketCode, matches]);
+
+    if (!preds) return 0;
+
+    let actualResults;
+    if (compareMode === 'live') {
+      actualResults = {
+        matches,
+        awards: {
+          goldenBall: null,
+          goldenBoot: null,
+          goldenGlove: null,
+          bestYoungPlayer: null
+        }
+      };
+    } else {
+      actualResults = generateMockActualResults(preds, compareMode);
+    }
+
+    const res = calculateBracketScore(preds, actualResults);
+    return res.totalScore;
+  }, [trackedPredictions, compareMode, savedBracketCode, matches]);
 
   // Sync saved bracket code on client mount
   useEffect(() => {
@@ -232,9 +244,9 @@ export default function Home() {
 
             {/* Box 3: PREDICTION SCORE */}
             <div className="px-5 py-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col justify-center">
-              <span className="text-[10px] text-zinc-500 uppercase font-black tracking-wider block">Prediction Score</span>
-              <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono mt-1">
-                {liveScore} <span className="text-xs font-bold text-amber-500/80">PTS</span>
+              <span className="text-[10px] text-zinc-500 uppercase font-black tracking-wider block">PREDICTION SCORE</span>
+              <span className="text-2xl sm:text-3xl font-black text-brand-yellow drop-shadow-[0_0_8px_rgba(250,204,21,0.5)] font-mono mt-1 flex items-baseline gap-1">
+                {liveScore} <span className="text-xs font-bold text-brand-yellow/80">PTS</span>
               </span>
               <span className="text-[9px] text-zinc-500 font-bold mt-0.5">
                 #1,405 Global Leaderboard Rank

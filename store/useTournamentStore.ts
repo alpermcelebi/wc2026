@@ -19,6 +19,10 @@ interface TournamentStore {
   groups: Record<string, GroupState>;
   thirdPlaceLadder: ThirdPlaceStanding[];
   awards: AwardsState;
+  trackedPredictions: { matches: Record<string, Match>; awards: AwardsState } | null;
+  compareMode: 'live' | 'simulation' | 'perfect';
+  setTrackedPredictions: (preds: { matches: Record<string, Match>; awards: AwardsState } | null) => void;
+  setCompareMode: (mode: 'live' | 'simulation' | 'perfect') => void;
   updateMatchScore: (
     matchId: string,
     homeScore: number | null,
@@ -347,6 +351,11 @@ export const useTournamentStore = create<TournamentStore>((set, get) => {
       goldenGlove: null,
       bestYoungPlayer: null
     },
+    trackedPredictions: null,
+    compareMode: 'live',
+
+    setTrackedPredictions: (preds) => set({ trackedPredictions: preds }),
+    setCompareMode: (mode) => set({ compareMode: mode }),
 
     updateMatchScore: (matchId, homeScore, awayScore, homePens = null, awayPens = null) => {
       const state = get();

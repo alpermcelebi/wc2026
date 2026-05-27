@@ -19,7 +19,10 @@ export const GroupStageView: React.FC<GroupStageViewProps> = ({ onShowThirds, is
   const scrollToGroup = (groupId: string) => {
     const element = groupRefs.current[groupId];
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const currentX = window.scrollX || window.pageXOffset;
+      const rect = element.getBoundingClientRect();
+      const targetY = rect.top + window.scrollY - 100; // Little padding
+      window.scrollTo({ top: targetY, left: currentX, behavior: 'smooth' });
     }
   };
 
@@ -43,9 +46,18 @@ export const GroupStageView: React.FC<GroupStageViewProps> = ({ onShowThirds, is
           const nextInput = document.querySelector(`[data-match-id="${nextIncompleteId}"] input`) as HTMLInputElement | null;
           if (nextInput) {
             nextInput.focus();
-            nextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const currentX = window.scrollX || window.pageXOffset;
+            const card = nextInput.closest('.match-card-container') || nextInput;
+            const cardRect = card.getBoundingClientRect();
+            const targetY = cardRect.top + window.scrollY - (window.innerHeight / 3);
+            
+            window.scrollTo({
+              top: targetY,
+              left: currentX,
+              behavior: 'smooth'
+            });
           }
-        }, 100);
+        }, 150);
       }
     }
   };

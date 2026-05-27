@@ -148,12 +148,22 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    const target = e.target;
     setTimeout(() => {
-      e.target.closest('.match-card-container')?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
+      const currentX = window.scrollX || window.pageXOffset;
+      const card = target.closest('.match-card-container');
+      if (!card) return;
+
+      const cardRect = card.getBoundingClientRect();
+      const absoluteCardTop = cardRect.top + window.scrollY;
+      const targetY = absoluteCardTop - (window.innerHeight / 3);
+
+      window.scrollTo({
+        top: targetY,
+        left: currentX,
+        behavior: 'smooth'
       });
-    }, 100);
+    }, 150);
   };
 
   const showPenalties =

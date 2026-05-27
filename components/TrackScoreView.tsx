@@ -12,13 +12,11 @@ interface TrackScoreViewProps {
 }
 
 export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = null }) => {
-  const { groups, matches: storeMatches } = useTournamentStore();
+  const { groups, matches: storeMatches, trackedPredictions: loadedPredictions, setTrackedPredictions: setLoadedPredictions, compareMode, setCompareMode } = useTournamentStore();
   
   const [bracketCode, setBracketCode] = useState(initialCode || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loadedPredictions, setLoadedPredictions] = useState<{ matches: Record<string, Match>; awards: AwardsState } | null>(null);
-  const [compareMode, setCompareMode] = useState<'live' | 'simulation' | 'perfect'>('live');
   const [activeSubTab, setActiveSubTab] = useState<'groups' | 'knockouts' | 'awards'>('groups');
 
   // Build team flag and name lookups from store groups
