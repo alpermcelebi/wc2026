@@ -122,7 +122,7 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
                 type="text"
                 readOnly
                 value={shareUrl}
-                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-zinc-300 font-mono focus:outline-none focus:border-brand-purple transition-all duration-300"
+                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-base touch-manipulation text-zinc-300 font-mono focus:outline-none focus:border-brand-purple transition-all duration-300"
                 onClick={(e) => (e.target as HTMLInputElement).select()}
               />
               <button

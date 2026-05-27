@@ -435,7 +435,7 @@ export default function AwardsGalaModal({
                           placeholder="Type candidate full name..."
                           value={customName}
                           onChange={handleCustomNameChange}
-                          className="w-full bg-transparent border-b border-white/10 focus:border-brand-lime outline-none text-white text-sm font-bold py-1 placeholder-white/20 transition-colors"
+                          className="w-full bg-transparent border-b border-white/10 focus:border-brand-lime outline-none text-white text-base touch-manipulation font-bold py-0.5 placeholder-white/20 transition-colors disabled:opacity-50"
                         />
                       </div>
                     </div>
@@ -456,7 +456,7 @@ export default function AwardsGalaModal({
                         placeholder="Search standard superstars by name or team code..."
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        className="w-full bg-transparent border-none outline-none text-sm text-white placeholder-white/20 font-bold"
+                        className="w-full bg-transparent outline-none text-base touch-manipulation text-white placeholder-white/20 font-semibold"
                       />
                       {searchQuery && (
                         <button 

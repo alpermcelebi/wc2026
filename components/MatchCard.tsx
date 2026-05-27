@@ -148,22 +148,20 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    const target = e.target;
-    setTimeout(() => {
-      const currentX = window.scrollX || window.pageXOffset;
-      const card = target.closest('.match-card-container');
-      if (!card) return;
+    // Prevent default native browser jumping if applicable
+    const card = e.target.closest('.match-card-container');
+    if (!card) return;
 
-      const cardRect = card.getBoundingClientRect();
-      const absoluteCardTop = cardRect.top + window.scrollY;
-      const targetY = absoluteCardTop - (window.innerHeight / 3);
+    const currentX = window.scrollX || window.pageXOffset;
+    const cardRect = card.getBoundingClientRect();
+    const targetY = cardRect.top + window.scrollY - 120; // 120px offset to keep team names perfectly visible above keyboard
 
-      window.scrollTo({
-        top: targetY,
-        left: currentX,
-        behavior: 'smooth'
-      });
-    }, 150);
+    // Force scroll immediately to target, matching the keyboard animation speed
+    window.scrollTo({
+      top: targetY,
+      left: currentX,
+      behavior: 'smooth'
+    });
   };
 
   const showPenalties =
@@ -300,7 +298,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
             onBlur={handleInputBlur}
             onFocus={handleFocus}
             placeholder="-"
-            className={`${compact ? 'w-9 h-7 text-sm' : 'w-12 h-9'} rounded-lg bg-white/5 border border-white/10 text-center font-bold text-white placeholder-white/20 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple outline-none transition-all disabled:opacity-30 disabled:cursor-not-allowed`}
+            className={`${compact ? 'w-9 h-7 text-base' : 'w-12 h-9 text-base'} touch-manipulation rounded-lg bg-white/5 border border-white/10 text-center font-bold text-white placeholder-white/20 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple outline-none transition-all disabled:opacity-30 disabled:cursor-not-allowed`}
           />
         </div>
 
@@ -322,7 +320,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
             onBlur={handleInputBlur}
             onFocus={handleFocus}
             placeholder="-"
-            className={`${compact ? 'w-9 h-7 text-sm' : 'w-12 h-9'} rounded-lg bg-white/5 border border-white/10 text-center font-bold text-white placeholder-white/20 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple outline-none transition-all disabled:opacity-30 disabled:cursor-not-allowed`}
+            className={`${compact ? 'w-9 h-7 text-base' : 'w-12 h-9 text-base'} touch-manipulation rounded-lg bg-white/5 border border-white/10 text-center font-bold text-white placeholder-white/20 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple outline-none transition-all disabled:opacity-30 disabled:cursor-not-allowed`}
           />
         </div>
       </div>
@@ -346,7 +344,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
                 onBlur={handleInputBlur}
                 onFocus={handleFocus}
                 placeholder="0"
-                className={`${compact ? 'w-8 h-6 text-xs' : 'w-10 h-8'} rounded bg-brand-orange/10 border border-brand-orange/20 text-center font-bold text-brand-orange focus:border-brand-orange focus:ring-1 focus:ring-brand-orange outline-none disabled:opacity-30`}
+                className={`${compact ? 'w-8 h-6 text-base' : 'w-10 h-8 text-base'} touch-manipulation rounded bg-brand-orange/10 border border-brand-orange/20 text-center font-bold text-brand-orange focus:border-brand-orange focus:ring-1 focus:ring-brand-orange outline-none disabled:opacity-30`}
               />
             </div>
             <span className={`${compact ? 'text-[10px]' : 'text-xs'} text-white/20 font-bold`}>vs</span>
@@ -361,7 +359,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
                 onBlur={handleInputBlur}
                 onFocus={handleFocus}
                 placeholder="0"
-                className={`${compact ? 'w-8 h-6 text-xs' : 'w-10 h-8'} rounded bg-brand-orange/10 border border-brand-orange/20 text-center font-bold text-brand-orange focus:border-brand-orange focus:ring-1 focus:ring-brand-orange outline-none disabled:opacity-30`}
+                className={`${compact ? 'w-8 h-6 text-base' : 'w-10 h-8 text-base'} touch-manipulation rounded bg-brand-orange/10 border border-brand-orange/20 text-center font-bold text-brand-orange focus:border-brand-orange focus:ring-1 focus:ring-brand-orange outline-none disabled:opacity-30`}
               />
               <span className={`${compact ? 'text-[10px]' : 'text-xs'} text-white/40 font-semibold`}>{awayTeam?.code}</span>
             </div>

@@ -217,7 +217,7 @@ const AwardCard: React.FC<AwardCardProps> = ({
                   placeholder="Type player name..."
                   value={customName}
                   onChange={handleCustomNameChange}
-                  className="w-full bg-transparent border-b border-white/10 focus:border-brand-lime outline-none text-white text-sm font-bold py-0.5 placeholder-white/20 transition-colors disabled:opacity-50"
+                  className="w-full bg-transparent border-b border-white/10 focus:border-brand-lime outline-none text-white text-base touch-manipulation font-bold py-0.5 placeholder-white/20 transition-colors disabled:opacity-50"
                 />
               </div>
             </div>
@@ -261,7 +261,7 @@ const AwardCard: React.FC<AwardCardProps> = ({
                     placeholder="Search candidate..."
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
-                    className="w-full bg-transparent outline-none text-xs text-white placeholder-white/20 font-semibold"
+                    className="w-full bg-transparent outline-none text-base touch-manipulation text-white placeholder-white/20 font-semibold"
                     autoFocus
                   />
                 </div>

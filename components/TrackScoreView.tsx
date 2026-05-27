@@ -228,7 +228,7 @@ export const TrackScoreView: React.FC<TrackScoreViewProps> = ({ initialCode = nu
                 placeholder="Enter Code (e.g. WC-K38P)"
                 value={bracketCode}
                 onChange={e => setBracketCode(e.target.value.toUpperCase())}
-                className="w-full bg-transparent border-none outline-none text-sm text-white placeholder-white/20 font-black tracking-wider uppercase font-mono"
+                className="w-full bg-transparent border-none outline-none text-base touch-manipulation text-white placeholder-white/20 font-black tracking-wider uppercase font-mono"
               />
             </div>
             <button
