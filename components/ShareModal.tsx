@@ -13,6 +13,7 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const [downloading, setDownloading] = useState(false);
+  const [sharingFile, setSharingFile] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -65,7 +66,28 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
     }
   };
 
+  const handleQuickShare = async () => {
+    const shareText = "🏆 İşte benim 2026 Dünya Kupası tahminlerim! Şampiyonumu seçtim, ödülleri belirledim. Sen de kendi turnuva ağacını kur ve kupon kodunu alarak benimle kapış!";
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "FIFA World Cup 2026 Bracket",
+          text: shareText,
+          url: shareUrl,
+        });
+      } else {
+        await navigator.clipboard.writeText(`${shareText}\n\nSite Linki: ${shareUrl}`);
+        alert("Tahmin linki ve mesajı başarıyla panoya kopyalandı! İstediğiniz yerde paylaşabilirsiniz.");
+      }
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        console.error('Quick share failed:', err);
+      }
+    }
+  };
+
   const handleNativeShare = async () => {
+    setSharingFile(true);
     try {
       const response = await fetch(ogImageUrl);
       const blob = await response.blob();
@@ -102,6 +124,8 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
       }
     } catch (err) {
       console.error("Share failed:", err);
+    } finally {
+      setSharingFile(false);
     }
   };
 
@@ -183,22 +207,41 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
             </div>
           </div>
 
-          {/* Download & Native Share Buttons */}
+          {/* Main Quick Share Button (Instant, no image loading) */}
+          <button
+            onClick={handleQuickShare}
+            className="w-full flex items-center justify-center gap-2.5 py-4 px-4 rounded-2xl bg-brand-gradient text-white font-black text-sm hover:opacity-95 shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all duration-300"
+          >
+            <Share2 className="w-5 h-5 animate-pulse" />
+            Instant Quick Share (Link & Text)
+          </button>
+
+          {/* Download & Native Share Poster File Buttons */}
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={handleDownload}
-              disabled={downloading}
-              className="flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-brand-purple text-white font-bold text-sm hover:bg-brand-purple/90 shadow-lg shadow-brand-purple/20 transition-all duration-300 disabled:opacity-50"
+              disabled={downloading || sharingFile}
+              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 font-bold text-xs text-white transition-all duration-300 disabled:opacity-50"
             >
               <Download className="w-4 h-4" />
-              {downloading ? 'Downloading...' : 'Download Image'}
+              {downloading ? 'Downloading...' : 'Download Poster'}
             </button>
             <button
               onClick={handleNativeShare}
-              className="flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 font-bold text-sm text-white transition-all duration-300"
+              disabled={downloading || sharingFile}
+              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 font-bold text-xs text-white transition-all duration-300 disabled:opacity-50"
             >
-              <Share2 className="w-4 h-4" />
-              Share Image
+              {sharingFile ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-4 h-4" />
+                  Share Poster File
+                </>
+              )}
             </button>
           </div>
 
