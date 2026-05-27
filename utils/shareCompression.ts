@@ -24,6 +24,15 @@ export const getFlagUrlByCode = (code: string): string => {
   return `https://flagcdn.com/w80/${iso.toLowerCase()}.png`;
 };
 
+export interface BracketMatch {
+  h: string;   // home team code
+  a: string;   // away team code
+  hs: number;  // home score
+  as: number;  // away score
+  hp?: number; // home penalties
+  ap?: number; // away penalties
+}
+
 export interface SharePayload {
   m: (number[] | null)[]; // Flat list of match scores: [homeScore, awayScore, homePens?, awayPens?]
   a: (string | null)[]; // List of awards: [goldenBall, goldenBoot, goldenGlove, bestYoungPlayer]
@@ -45,6 +54,8 @@ export interface SharePayload {
     byTeam: string;
     sfTeams: string[];
     qfTeams: string[];
+    qf: (BracketMatch | null)[];  // 4 QF match results for bracket rendering
+    sf: (BracketMatch | null)[];  // 2 SF match results for bracket rendering
   };
 }
 
@@ -178,6 +189,17 @@ export const serializePredictions = (
     getMatchLoser(matches['QF_4']),
   ].filter(Boolean) as string[];
 
+  // Extract compact bracket match data for the infographic
+  const extractBracketMatch = (match: Match | undefined): BracketMatch | null => {
+    if (!match?.isCompleted || !match?.homeTeam || !match?.awayTeam || match.homeScore === null || match.awayScore === null) return null;
+    const result: BracketMatch = { h: match.homeTeam.code, a: match.awayTeam.code, hs: match.homeScore, as: match.awayScore };
+    if (typeof match.homePenalties === 'number' && typeof match.awayPenalties === 'number') {
+      result.hp = match.homePenalties;
+      result.ap = match.awayPenalties;
+    }
+    return result;
+  };
+
   const payload: SharePayload = {
     m,
     a,
@@ -198,7 +220,9 @@ export const serializePredictions = (
       byName: by.name,
       byTeam: by.team,
       sfTeams,
-      qfTeams
+      qfTeams,
+      qf: ['QF_1', 'QF_2', 'QF_3', 'QF_4'].map(id => extractBracketMatch(matches[id])),
+      sf: ['SF_1', 'SF_2'].map(id => extractBracketMatch(matches[id])),
     }
   };
 
