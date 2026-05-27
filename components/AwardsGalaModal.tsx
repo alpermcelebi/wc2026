@@ -267,132 +267,11 @@ export default function AwardsGalaModal({
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 md:p-8 flex-1 overflow-y-auto scrollbar-thin relative flex flex-col justify-between gap-8">
+        <div className="p-4 md:p-8 flex-1 overflow-y-auto scrollbar-thin relative flex flex-col gap-8">
           
-          {/* Main Podium View Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-end min-h-[360px] pt-8">
-            {AWARD_CONFIGS.map(award => {
-              const player = getSelectedPlayerDetails(award.key);
-              // Podium height configuration based on rank:
-              // Rank 1 (Ball): tallest, Rank 2 (Boot): second, Rank 3 (Glove): third, Rank 4 (Young): fourth
-              const heightClass = 
-                award.rank === 1 ? 'h-36' :
-                award.rank === 2 ? 'h-28' :
-                award.rank === 3 ? 'h-24' :
-                'h-20';
-
-              return (
-                <div key={award.key} className="flex flex-col items-center group relative">
-                  
-                  {/* Player Card (Floats above podium) */}
-                  <div className="mb-4 w-full flex flex-col items-center transition-all duration-300 group-hover:-translate-y-1">
-                    {player ? (
-                      <div 
-                        onClick={() => handleOpenPodium(award.key)}
-                        className="flex flex-col items-center text-center cursor-pointer p-2 rounded-2xl bg-white/3 border border-white/5 w-full hover:border-white/10 transition-colors"
-                      >
-                        {player.isCustom ? (
-                          <div className="w-12 h-12 rounded-xl bg-brand-lime/10 border border-brand-lime/20 flex items-center justify-center mb-2 shadow-inner">
-                            <Sparkles className="w-6 h-6 text-brand-lime" />
-                          </div>
-                        ) : (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={teamFlagMap[player.teamCode]}
-                            alt={player.teamCode}
-                            className="w-14 h-9 object-cover rounded shadow border border-white/10 mb-2"
-                          />
-                        )}
-                        <span className="text-xs font-black text-white truncate max-w-full block leading-tight px-1">
-                          {player.name}
-                        </span>
-                        <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-0.5">
-                          {player.teamCode}
-                        </span>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => handleOpenPodium(award.key)}
-                        className="w-12 h-12 rounded-full border border-dashed border-white/20 hover:border-white/40 bg-white/3 flex items-center justify-center text-zinc-400 hover:text-white hover:scale-105 transition-all shadow-inner"
-                      >
-                        <User className="w-5 h-5 opacity-40" />
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Physical Podium Pedestal block */}
-                  <div 
-                    onClick={() => handleOpenPodium(award.key)}
-                    className={`w-full rounded-2xl bg-gradient-to-t ${award.gradient} ${award.borderColor} border border-b-0 shadow-lg ${award.glowColor} ${heightClass} flex flex-col justify-end items-center pb-4 cursor-pointer relative group-hover:opacity-95 transition-opacity`}
-                  >
-                    {/* Glowing Accent Indicator */}
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-white/10 rounded-t-2xl" />
-
-                    <span className="text-2xl mb-1 filter drop-shadow-md">{award.icon}</span>
-                    <span className="text-[10px] font-black text-white uppercase tracking-wider px-1 text-center truncate w-full">
-                      {award.title}
-                    </span>
-                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wide mt-1.5 border ${award.badgeBg}`}>
-                      {award.subtitle}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Action Footer Bar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/5 pt-6 mt-4">
-            <div className="text-center sm:text-left">
-              <p className="text-xs text-zinc-400">
-                Status: <span className="font-mono text-zinc-300 font-bold">
-                  {Object.values(awards).filter(v => v !== null && v !== 'write-in:').length}/4 Categories Predicted
-                </span>
-              </p>
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end">
-              {savedBracketCode ? (
-                <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold font-mono">
-                  ✓ Saved: {savedBracketCode}
-                </div>
-              ) : (
-                onSaveBracket && (
-                  <button
-                    onClick={onSaveBracket}
-                    disabled={isSaving}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold text-sm transition-all disabled:opacity-50 cursor-pointer"
-                  >
-                    {isSaving ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        🔒 Save My Bracket
-                      </>
-                    )}
-                  </button>
-                )
-              )}
-
-              <button
-                onClick={onGeneratePoster}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-brand-red via-brand-purple to-brand-blue font-black text-sm text-white hover:opacity-95 shadow-lg shadow-brand-purple/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
-              >
-                <Share2 className="w-4 h-4 animate-pulse" />
-                Generate My Official Shareable Poster
-              </button>
-            </div>
-          </div>
-
-          {/* AUTOCOMPLETE SELECTION PANEL OVERLAY (Slides up/fades in inside modal) */}
-          {activePodiumKey && activeAwardConfig && (
-            <div 
-              ref={overlayRef}
-              className="absolute inset-0 bg-[#070711]/98 z-40 p-6 flex flex-col justify-between animate-fadeIn"
-            >
+          {activePodiumKey && activeAwardConfig ? (
+            {/* AUTOCOMPLETE SELECTION PANEL (Replaces Podium View to prevent overlap) */}
+            <div className="flex-1 flex flex-col animate-fadeIn">
               <div className="space-y-4 flex-1 flex flex-col overflow-hidden">
                 {/* Overlay Header */}
                 <div className="flex items-center justify-between border-b border-white/5 pb-4">
@@ -513,6 +392,125 @@ export default function AwardsGalaModal({
                     </div>
                   </>
                 )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col justify-between h-full">
+              {/* Main Podium View Grid */}
+              <div className="grid grid-cols-2 gap-4 w-full px-2 items-end min-h-[360px] pt-4">
+                {AWARD_CONFIGS.map(award => {
+                  const player = getSelectedPlayerDetails(award.key);
+                  // Podium height configuration based on rank
+                  const heightClass = 
+                    award.rank === 1 ? 'h-36' :
+                    award.rank === 2 ? 'h-28' :
+                    award.rank === 3 ? 'h-24' :
+                    'h-20';
+
+                  return (
+                    <div key={award.key} className="flex flex-col items-center group">
+                      
+                      {/* Player Card (Floats above podium) */}
+                      <div className="mb-3 w-full flex flex-col items-center transition-all duration-300 group-hover:-translate-y-1">
+                        {player ? (
+                          <div 
+                            onClick={() => handleOpenPodium(award.key)}
+                            className="flex flex-col items-center text-center cursor-pointer p-2 rounded-2xl bg-white/5 border border-white/10 w-full hover:border-white/20 transition-colors shadow-lg"
+                          >
+                            {player.isCustom ? (
+                              <div className="w-12 h-12 rounded-xl bg-brand-lime/10 border border-brand-lime/20 flex items-center justify-center mb-1 shadow-inner">
+                                <Sparkles className="w-5 h-5 text-brand-lime" />
+                              </div>
+                            ) : (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={teamFlagMap[player.teamCode]}
+                                alt={player.teamCode}
+                                className="w-12 h-8 object-cover rounded shadow border border-white/10 mb-1"
+                              />
+                            )}
+                            <span className="text-[11px] font-black text-white truncate max-w-full block leading-tight px-1">
+                              {player.name}
+                            </span>
+                            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-0.5">
+                              {player.teamCode}
+                            </span>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleOpenPodium(award.key)}
+                            className="w-12 h-12 rounded-full border border-dashed border-white/20 hover:border-white/40 bg-white/5 flex items-center justify-center text-zinc-400 hover:text-white hover:scale-105 transition-all shadow-inner"
+                          >
+                            <User className="w-5 h-5 opacity-40" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Physical Podium Pedestal block */}
+                      <div 
+                        onClick={() => handleOpenPodium(award.key)}
+                        className={`w-full rounded-2xl bg-gradient-to-t ${award.gradient} ${award.borderColor} border border-b-0 shadow-lg ${award.glowColor} ${heightClass} flex flex-col justify-end items-center pb-3 cursor-pointer relative group-hover:opacity-95 transition-opacity`}
+                      >
+                        {/* Glowing Accent Indicator */}
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-white/10 rounded-t-2xl" />
+
+                        <span className="text-xl mb-1 filter drop-shadow-md">{award.icon}</span>
+                        <span className="text-[9px] font-black text-white uppercase tracking-wider px-1 text-center truncate w-full">
+                          {award.title}
+                        </span>
+                        <span className={`inline-flex items-center px-1 py-0.5 rounded-full text-[7px] font-black uppercase tracking-wide mt-1 border ${award.badgeBg}`}>
+                          {award.subtitle}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Action Footer Bar */}
+              <div className="flex flex-col items-center gap-4 border-t border-white/5 pt-6 mt-8 w-full">
+                <div className="text-center w-full">
+                  <p className="text-xs text-zinc-400">
+                    Status: <span className="font-mono text-zinc-300 font-bold">
+                      {Object.values(awards).filter(v => v !== null && v !== 'write-in:').length}/4 Categories Predicted
+                    </span>
+                  </p>
+                </div>
+                
+                <div className="flex flex-col items-center gap-3 w-full">
+                  {savedBracketCode ? (
+                    <div className="w-full max-w-sm flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold font-mono">
+                      ✓ Saved: {savedBracketCode}
+                    </div>
+                  ) : (
+                    onSaveBracket && (
+                      <button
+                        onClick={onSaveBracket}
+                        disabled={isSaving}
+                        className="w-full max-w-sm flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold text-sm transition-all disabled:opacity-50 cursor-pointer"
+                      >
+                        {isSaving ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            🔒 Save My Bracket
+                          </>
+                        )}
+                      </button>
+                    )
+                  )}
+
+                  <button
+                    onClick={onGeneratePoster}
+                    className="w-full max-w-sm flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-brand-red via-brand-purple to-brand-blue font-black text-sm text-white hover:opacity-95 shadow-lg shadow-brand-purple/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+                  >
+                    <Share2 className="w-4 h-4 animate-pulse" />
+                    Generate My Shareable Poster
+                  </button>
+                </div>
               </div>
             </div>
           )}

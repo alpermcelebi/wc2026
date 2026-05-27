@@ -38,9 +38,11 @@ export interface SharePayload {
     gbName: string;
     gbTeam: string;
     gtName: string;
-    gtTeam: string;
-    ggName: string;
     ggTeam: string;
+    byName: string;
+    byTeam: string;
+    sfTeams: string[];
+    qfTeams: string[];
   };
 }
 
@@ -145,6 +147,25 @@ export const serializePredictions = (
   const gb = getPlayerInfo(awards.goldenBall);
   const gt = getPlayerInfo(awards.goldenBoot);
   const gg = getPlayerInfo(awards.goldenGlove);
+  const by = getPlayerInfo(awards.bestYoungPlayer);
+
+  const sfTeams = [
+    matches['SF_1']?.homeTeam?.code,
+    matches['SF_1']?.awayTeam?.code,
+    matches['SF_2']?.homeTeam?.code,
+    matches['SF_2']?.awayTeam?.code,
+  ].filter(Boolean) as string[];
+
+  const qfTeams = [
+    matches['QF_1']?.homeTeam?.code,
+    matches['QF_1']?.awayTeam?.code,
+    matches['QF_2']?.homeTeam?.code,
+    matches['QF_2']?.awayTeam?.code,
+    matches['QF_3']?.homeTeam?.code,
+    matches['QF_3']?.awayTeam?.code,
+    matches['QF_4']?.homeTeam?.code,
+    matches['QF_4']?.awayTeam?.code,
+  ].filter(Boolean) as string[];
 
   const payload: SharePayload = {
     m,
@@ -162,7 +183,11 @@ export const serializePredictions = (
       gtName: gt.name,
       gtTeam: gt.team,
       ggName: gg.name,
-      ggTeam: gg.team
+      ggTeam: gg.team,
+      byName: by.name,
+      byTeam: by.team,
+      sfTeams,
+      qfTeams
     }
   };
 

@@ -7,6 +7,7 @@ export const runtime = 'edge';
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get('predictions');
+  const type = searchParams.get('type') || 'champion';
 
   if (!code) {
     return new Response('Missing predictions parameter', { status: 400 });
@@ -112,158 +113,112 @@ export async function GET(request: NextRequest) {
               marginBottom: '20px',
             }}
           >
-            {/* Left Column: Final & Champion */}
-            <div 
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                flex: 1.2,
-                backgroundColor: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.04)',
-                padding: '20px',
-                borderRadius: '16px',
-                marginRight: '20px',
-                justifyContent: 'space-between',
-              }}
-            >
-              <span style={{ fontSize: '9px', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                Grand Final Prediction
-              </span>
-
-              {/* Final Match Scoreboard */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '12px 0' }}>
-                {/* Home team */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-                  <img src={getFlagUrlByCode(s.home)} style={{ width: '64px', height: '40px', objectFit: 'cover', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }} />
-                  <span style={{ fontSize: '15px', fontWeight: 900, color: 'white', marginTop: '6px' }}>{s.home || 'TBD'}</span>
-                </div>
-
-                {/* Score */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 16px' }}>
-                  <span style={{ fontSize: '32px', fontWeight: 900, color: 'white', lineHeight: 1 }}>
-                    {s.homeScore !== null && s.awayScore !== null ? `${s.homeScore} - ${s.awayScore}` : 'vs'}
-                  </span>
-                  {s.homePens !== null && s.awayPens !== null && (
-                    <span style={{ fontSize: '9px', fontWeight: 'bold', color: '#f97316', marginTop: '4px' }}>
-                      ({s.homePens} - {s.awayPens}) Pens
-                    </span>
-                  )}
-                </div>
-
-                {/* Away team */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-                  <img src={getFlagUrlByCode(s.away)} style={{ width: '64px', height: '40px', objectFit: 'cover', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }} />
-                  <span style={{ fontSize: '15px', fontWeight: 900, color: 'white', marginTop: '6px' }}>{s.away || 'TBD'}</span>
-                </div>
-              </div>
-
-              {/* Predicted Champion Panel */}
-              <div 
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  backgroundColor: 'rgba(234, 179, 8, 0.06)',
-                  border: '1px solid rgba(234, 179, 8, 0.15)',
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  marginTop: '8px',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <div 
-                    style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '50%',
-                      backgroundColor: 'rgba(234, 179, 8, 0.12)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginRight: '12px',
-                    }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#eab308" strokeWidth="2.5">
-                      <circle cx="12" cy="8" r="7" />
-                      <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
-                    </svg>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '9px', fontWeight: 900, color: '#eab308', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                      Predicted World Champion
-                    </span>
-                    <span style={{ fontSize: '16px', fontWeight: 900, color: 'white', marginTop: '2px', lineHeight: 1.1 }}>
-                      {s.winner || 'Undecided'}
-                    </span>
-                  </div>
-                </div>
-                {s.winner && (
-                  <img src={getFlagUrlByCode(s.winner)} style={{ width: '40px', height: '25px', objectFit: 'cover', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)' }} />
-                )}
-              </div>
-            </div>
-
-            {/* Right Column: Awards list */}
-            <div 
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                flex: 1,
-                backgroundColor: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.04)',
-                padding: '20px',
-                borderRadius: '16px',
-                justifyContent: 'space-between',
-              }}
-            >
-              <span style={{ fontSize: '9px', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                Individual Awards Predictions
-              </span>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}>
-                {/* Golden Ball */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', padding: '10px 12px', borderRadius: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <span style={{ fontSize: '20px', marginRight: '10px' }}>🏆</span>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontSize: '8px', fontWeight: 900, color: '#917cff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Golden Ball (MVP)</span>
-                      <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'white', marginTop: '2px' }}>{s.gbName}</span>
+            {type === 'semifinals' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: '42px', fontWeight: 900, color: '#917cff', textTransform: 'uppercase', marginBottom: '60px', letterSpacing: '2px' }}>MY TOP 4 - SEMI-FINALISTS</span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '40px', width: '100%', maxWidth: '800px' }}>
+                  {s.sfTeams && s.sfTeams.length > 0 ? s.sfTeams.map((t, i) => (
+                    <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', padding: '30px', borderRadius: '24px', width: '45%' }}>
+                      <img src={getFlagUrlByCode(t)} style={{ width: '120px', height: '80px', borderRadius: '8px', border: '2px solid rgba(255,255,255,0.2)' }} />
+                      <span style={{ fontSize: '36px', fontWeight: 900, color: 'white', marginTop: '20px' }}>{t}</span>
                     </div>
-                  </div>
-                  {s.gbTeam && (
-                    <img src={getFlagUrlByCode(s.gbTeam)} style={{ width: '28px', height: '18px', objectFit: 'cover', borderRadius: '3px', border: '1px solid rgba(255,255,255,0.1)' }} />
-                  )}
-                </div>
-
-                {/* Golden Boot */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', padding: '10px 12px', borderRadius: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <span style={{ fontSize: '20px', marginRight: '10px' }}>⚽</span>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontSize: '8px', fontWeight: 900, color: '#b6f124', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Golden Boot (Top Scorer)</span>
-                      <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'white', marginTop: '2px' }}>{s.gtName}</span>
-                    </div>
-                  </div>
-                  {s.gtTeam && (
-                    <img src={getFlagUrlByCode(s.gtTeam)} style={{ width: '28px', height: '18px', objectFit: 'cover', borderRadius: '3px', border: '1px solid rgba(255,255,255,0.1)' }} />
-                  )}
-                </div>
-
-                {/* Golden Glove */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', padding: '10px 12px', borderRadius: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <span style={{ fontSize: '20px', marginRight: '10px' }}>🧤</span>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontSize: '8px', fontWeight: 900, color: '#1d62ff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Golden Glove (Best GK)</span>
-                      <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'white', marginTop: '2px' }}>{s.ggName}</span>
-                    </div>
-                  </div>
-                  {s.ggTeam && (
-                    <img src={getFlagUrlByCode(s.ggTeam)} style={{ width: '28px', height: '18px', objectFit: 'cover', borderRadius: '3px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                  )) : (
+                    <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '24px' }}>Semi-Finalists not predicted yet.</span>
                   )}
                 </div>
               </div>
-            </div>
+            ) : type === 'quarterfinals' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: '42px', fontWeight: 900, color: '#00D2B4', textTransform: 'uppercase', marginBottom: '50px', letterSpacing: '2px' }}>THE ELITE EIGHT - QUARTER-FINALISTS</span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '24px', width: '100%', maxWidth: '1000px' }}>
+                  {s.qfTeams && s.qfTeams.length > 0 ? s.qfTeams.map((t, i) => (
+                    <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', padding: '24px', borderRadius: '20px', width: '22%' }}>
+                      <img src={getFlagUrlByCode(t)} style={{ width: '80px', height: '54px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)' }} />
+                      <span style={{ fontSize: '28px', fontWeight: 900, color: 'white', marginTop: '16px' }}>{t}</span>
+                    </div>
+                  )) : (
+                    <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '24px' }}>Quarter-Finalists not predicted yet.</span>
+                  )}
+                </div>
+              </div>
+            ) : type === 'awards' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: '42px', fontWeight: 900, color: '#eab308', textTransform: 'uppercase', marginBottom: '30px', letterSpacing: '2px' }}>WORLD CUP 2026 - INDIVIDUAL AWARDS GALA</span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '24px', width: '100%', maxWidth: '1000px' }}>
+                  {/* Golden Ball */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'rgba(145,124,255,0.05)', border: '1px solid rgba(145,124,255,0.2)', padding: '20px', borderRadius: '24px', width: '45%' }}>
+                    <span style={{ fontSize: '48px' }}>🏆</span>
+                    <span style={{ fontSize: '18px', fontWeight: 900, color: '#917cff', textTransform: 'uppercase', marginTop: '8px', letterSpacing: '1px' }}>Golden Ball (MVP)</span>
+                    <span style={{ fontSize: '32px', fontWeight: 900, color: 'white', marginTop: '8px' }}>{s.gbName}</span>
+                    {s.gbTeam && s.gbTeam !== 'OTH' && <img src={getFlagUrlByCode(s.gbTeam)} style={{ width: '60px', height: '40px', marginTop: '16px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)' }} />}
+                  </div>
+                  {/* Golden Boot */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'rgba(234,88,12,0.05)', border: '1px solid rgba(234,88,12,0.2)', padding: '20px', borderRadius: '24px', width: '45%' }}>
+                    <span style={{ fontSize: '48px' }}>⚽</span>
+                    <span style={{ fontSize: '18px', fontWeight: 900, color: '#ea580c', textTransform: 'uppercase', marginTop: '8px', letterSpacing: '1px' }}>Golden Boot (Top Scorer)</span>
+                    <span style={{ fontSize: '32px', fontWeight: 900, color: 'white', marginTop: '8px' }}>{s.gtName}</span>
+                    {s.gtTeam && s.gtTeam !== 'OTH' && <img src={getFlagUrlByCode(s.gtTeam)} style={{ width: '60px', height: '40px', marginTop: '16px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)' }} />}
+                  </div>
+                  {/* Golden Glove */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'rgba(29,98,255,0.05)', border: '1px solid rgba(29,98,255,0.2)', padding: '20px', borderRadius: '24px', width: '45%' }}>
+                    <span style={{ fontSize: '48px' }}>🧤</span>
+                    <span style={{ fontSize: '18px', fontWeight: 900, color: '#1d62ff', textTransform: 'uppercase', marginTop: '8px', letterSpacing: '1px' }}>Golden Glove (Best GK)</span>
+                    <span style={{ fontSize: '32px', fontWeight: 900, color: 'white', marginTop: '8px' }}>{s.ggName}</span>
+                    {s.ggTeam && s.ggTeam !== 'OTH' && <img src={getFlagUrlByCode(s.ggTeam)} style={{ width: '60px', height: '40px', marginTop: '16px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)' }} />}
+                  </div>
+                  {/* Best Young Player */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'rgba(132,204,22,0.05)', border: '1px solid rgba(132,204,22,0.2)', padding: '20px', borderRadius: '24px', width: '45%' }}>
+                    <span style={{ fontSize: '48px' }}>🌟</span>
+                    <span style={{ fontSize: '18px', fontWeight: 900, color: '#84cc16', textTransform: 'uppercase', marginTop: '8px', letterSpacing: '1px' }}>Best Young Player</span>
+                    <span style={{ fontSize: '32px', fontWeight: 900, color: 'white', marginTop: '8px' }}>{s.byName || 'TBD'}</span>
+                    {s.byTeam && s.byTeam !== 'OTH' && <img src={getFlagUrlByCode(s.byTeam)} style={{ width: '60px', height: '40px', marginTop: '16px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)' }} />}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: '48px', fontWeight: 900, color: '#eab308', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '2px', textShadow: '0 4px 20px rgba(234,179,8,0.4)' }}>
+                  MY 2026 WORLD CUP CHAMPION
+                </span>
+                
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '40px' }}>
+                   {s.winner ? (
+                     <div style={{ display: 'flex', alignItems: 'center' }}>
+                       <img src={getFlagUrlByCode(s.winner)} style={{ width: '240px', height: '160px', objectFit: 'cover', borderRadius: '16px', border: '4px solid rgba(255,255,255,0.2)' }} />
+                       <span style={{ fontSize: '100px', fontWeight: 900, color: 'white', marginLeft: '48px', textShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>{s.winner}</span>
+                     </div>
+                   ) : (
+                     <span style={{ fontSize: '48px', fontWeight: 900, color: 'rgba(255,255,255,0.5)' }}>UNDECIDED</span>
+                   )}
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '60px', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', padding: '24px 48px', borderRadius: '24px' }}>
+                  <span style={{ fontSize: '16px', fontWeight: 900, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '16px' }}>Grand Final Result</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <span style={{ fontSize: '32px', fontWeight: 900, color: 'white' }}>{s.home || 'TBD'}</span>
+                      {s.home && <img src={getFlagUrlByCode(s.home)} style={{ width: '48px', height: '32px', borderRadius: '4px' }} />}
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <span style={{ fontSize: '48px', fontWeight: 900, color: 'white', lineHeight: 1 }}>
+                        {s.homeScore !== null && s.awayScore !== null ? `${s.homeScore} - ${s.awayScore}` : 'VS'}
+                      </span>
+                      {s.homePens !== null && s.awayPens !== null && (
+                        <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#f97316', marginTop: '8px' }}>
+                          ({s.homePens} - {s.awayPens}) Pens
+                        </span>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      {s.away && <img src={getFlagUrlByCode(s.away)} style={{ width: '48px', height: '32px', borderRadius: '4px' }} />}
+                      <span style={{ fontSize: '32px', fontWeight: 900, color: 'white' }}>{s.away || 'TBD'}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Footer */}

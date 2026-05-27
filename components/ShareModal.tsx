@@ -12,6 +12,7 @@ interface ShareModalProps {
 export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
+  const [posterType, setPosterType] = useState<'champion' | 'semifinals' | 'quarterfinals' | 'awards'>('champion');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -43,7 +44,7 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
     }
   };
 
-  const ogImageUrl = `/api/og?predictions=${shareCode}`;
+  const ogImageUrl = `/api/og?predictions=${shareCode}&type=${posterType}`;
 
   const twitterIntent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
     'Check out my predictions for the FIFA World Cup 2026! Who is your champion?'
@@ -91,11 +92,45 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
 
         {/* Modal Body */}
         <div className="p-6 space-y-6 overflow-y-auto scrollbar-thin">
+          
+          {/* Poster Selection Tabs */}
+          <div className="flex border-b border-white/10 gap-1 overflow-x-auto scrollbar-none">
+            {[
+              { id: 'champion', label: 'Champion Poster' },
+              { id: 'semifinals', label: 'Semi-Finals' },
+              { id: 'quarterfinals', label: 'Quarter-Finals' },
+              { id: 'awards', label: 'Awards Gala' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setPosterType(tab.id as any)}
+                className={`flex items-center gap-2 px-4 py-2.5 border-b-2 font-bold text-xs transition-all duration-300 whitespace-nowrap ${
+                  posterType === tab.id
+                    ? 'border-brand-purple text-brand-purple bg-brand-purple/5'
+                    : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
           {/* Real-time image preview */}
           <div className="space-y-2">
-            <span className="text-[10px] font-black uppercase text-zinc-500 tracking-wider">
-              Social Card Preview
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase text-zinc-500 tracking-wider">
+                Social Card Preview
+              </span>
+              <a 
+                href={ogImageUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-[10px] font-bold text-brand-purple hover:text-white flex items-center gap-1 transition-colors"
+              >
+                <ExternalLink className="w-3 h-3" />
+                Open Image
+              </a>
+            </div>
             <div className="relative aspect-[1200/630] rounded-2xl overflow-hidden border border-white/10 bg-zinc-950/80 shadow-inner group">
               <img
                 src={ogImageUrl}
@@ -105,8 +140,7 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
               />
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300 pointer-events-none">
                 <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-bold text-white backdrop-blur-sm">
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  Generated Preview Card
+                  Long press or Right-click to Save Image
                 </span>
               </div>
             </div>
