@@ -24,8 +24,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       images: [
         {
           url: ogUrl,
-          width: 1920,
-          height: 1080,
+          width: 1080,
+          height: 1920,
           alt: 'World Cup 2026 Prediction Bracket',
         },
       ],

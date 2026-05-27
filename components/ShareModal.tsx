@@ -154,7 +154,7 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
                 Open Full Size
               </a>
             </div>
-            <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 bg-zinc-950/80 shadow-inner group">
+            <div className="relative h-[400px] sm:h-[460px] aspect-[9/16] mx-auto rounded-2xl overflow-hidden border border-white/10 bg-zinc-950/80 shadow-inner group">
               <img
                 src={ogImageUrl}
                 alt="Official Bracket Prediction Poster"
