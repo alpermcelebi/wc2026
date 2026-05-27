@@ -29,6 +29,10 @@ Users can download dynamic, auto-generated vertical story posters of their brack
 * **Third-Place Wildcards**: Automatically computes and ranks the top 8 third-place teams based on FIFA rules to qualify for the Round of 32.
 * **Knockout Bracket Tree**: Interactive elimination tree from the Round of 32 down to the Grand Final, complete with score tracking, penalty overrides, and visual paths.
 
+### 🎯 Live Score Tracking & Verification
+* **Unique Bracket Codes**: When saving a bracket, the system generates a unique 6-character code (e.g., `A8F9X2`).
+* **Live Score Verification**: Users can enter their unique code in the **"Track My Score"** tab or visit their shareable URL to load their saved predictions. The application dynamically compares their predictions against real tournament results to calculate their live score and verify accuracy.
+
 ### 🎵 Integrated Ambient Music Controller
 * Fully integrated ambient player built directly into the header dashboard metrics panel.
 * Track selection (anthems, mixes), play/pause toggles, and volume mute controls.
