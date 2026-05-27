@@ -151,22 +151,31 @@ export const serializePredictions = (
   const gg = getPlayerInfo(awards.goldenGlove);
   const by = getPlayerInfo(awards.bestYoungPlayer);
 
+  // Helper: given a match, return the loser's team code
+  const getMatchLoser = (match: Match | undefined): string | null => {
+    if (!match || !match.isCompleted || match.homeScore === null || match.awayScore === null) return null;
+    if (!match.homeTeam || !match.awayTeam) return null;
+    if (match.homeScore > match.awayScore) return match.awayTeam.code;
+    if (match.awayScore > match.homeScore) return match.homeTeam.code;
+    // Draw → penalties
+    if (typeof match.homePenalties === 'number' && typeof match.awayPenalties === 'number') {
+      return match.homePenalties > match.awayPenalties ? match.awayTeam.code : match.homeTeam.code;
+    }
+    return null;
+  };
+
+  // SF losers = the 2 teams eliminated in the semi-finals (missed the Grand Final)
   const sfTeams = [
-    matches['SF_1']?.homeTeam?.code,
-    matches['SF_1']?.awayTeam?.code,
-    matches['SF_2']?.homeTeam?.code,
-    matches['SF_2']?.awayTeam?.code,
+    getMatchLoser(matches['SF_1']),
+    getMatchLoser(matches['SF_2']),
   ].filter(Boolean) as string[];
 
+  // QF losers = the 4 teams eliminated in the quarter-finals (missed the Semi-Finals)
   const qfTeams = [
-    matches['QF_1']?.homeTeam?.code,
-    matches['QF_1']?.awayTeam?.code,
-    matches['QF_2']?.homeTeam?.code,
-    matches['QF_2']?.awayTeam?.code,
-    matches['QF_3']?.homeTeam?.code,
-    matches['QF_3']?.awayTeam?.code,
-    matches['QF_4']?.homeTeam?.code,
-    matches['QF_4']?.awayTeam?.code,
+    getMatchLoser(matches['QF_1']),
+    getMatchLoser(matches['QF_2']),
+    getMatchLoser(matches['QF_3']),
+    getMatchLoser(matches['QF_4']),
   ].filter(Boolean) as string[];
 
   const payload: SharePayload = {

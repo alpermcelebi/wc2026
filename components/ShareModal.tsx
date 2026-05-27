@@ -96,10 +96,10 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
           {/* Poster Selection Tabs */}
           <div className="flex border-b border-white/10 gap-1 overflow-x-auto scrollbar-none">
             {[
-              { id: 'champion', label: 'Champion Poster' },
-              { id: 'semifinals', label: 'Semi-Finals' },
-              { id: 'quarterfinals', label: 'Quarter-Finals' },
-              { id: 'awards', label: 'Awards Gala' }
+              { id: 'champion', label: '🏆 Champion' },
+              { id: 'semifinals', label: '⚔️ SF Eliminated' },
+              { id: 'quarterfinals', label: '🎯 QF Eliminated' },
+              { id: 'awards', label: '🎖️ Awards' }
             ].map(tab => (
               <button
                 key={tab.id}
