@@ -14,6 +14,42 @@ import { TrackScoreView } from '../components/TrackScoreView';
 import { serializePredictions } from '../utils/shareCompression';
 import { calculateBracketScore, generateMockActualResults } from '../utils/scoringEngine';
 
+const CODE_TO_EMOJI: Record<string, string> = {
+  ARG: '🇦🇷', FRA: '🇫🇷', BRA: '🇧🇷', ENG: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', GER: '🇩🇪',
+  ESP: '🇪🇸', POR: '🇵🇹', NED: '🇳🇱', BEL: '🇧🇪', ITA: '🇮🇹',
+  TUR: '🇹🇷', USA: '🇺🇸', MEX: '🇲🇽', CAN: '🇨🇦', MAR: '🇲🇦',
+  COL: '🇨🇴', URU: '🇺🇾', CRO: '🇭🇷', SEN: '🇸🇳', JPN: '🇯🇵',
+  KOR: '🇰🇷', SUI: '🇨🇭', SWE: '🇸🇪', NOR: '🇳🇴', AUT: '🇦🇹',
+  DEN: '🇩🇰', UKR: '🇺🇦', POL: '🇵🇱', ROU: '🇷🇴', HUN: '🇭🇺',
+  SCO: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', WAL: '🏴󠁧󠁢󠁷󠁬󠁳󠁿', CZE: '🇨🇿', GRE: '🇬🇷',
+};
+
+const getFlagEmoji = (code: string) => CODE_TO_EMOJI[code.toUpperCase()] || '🏳️';
+
+const CountUpTicker = ({ value }: { value: number }) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTimestamp: number | null = null;
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / 1000, 1);
+      setCount(Math.floor(progress * value));
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    window.requestAnimationFrame(step);
+  }, [value]);
+
+  return <span>🔥 {count.toLocaleString()} Brackets Created</span>;
+};
+
+interface CommunityStats {
+  total_brackets_count: number;
+  champion_distribution: Array<{ code: string; name: string; percentage: number }>;
+}
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'groups' | 'bracket' | 'thirds' | 'awards' | 'track'>('groups');
   
@@ -25,6 +61,22 @@ export default function Home() {
   
   const [savedBracketCode, setSavedBracketCode] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [stats, setStats] = useState<CommunityStats | null>(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('/api/community-stats');
+        const data = await res.json();
+        if (data.success) {
+          setStats(data);
+        }
+      } catch (err) {
+        console.error('Error fetching community stats:', err);
+      }
+    };
+    fetchStats();
+  }, []);
 
   const { thirdPlaceLadder, resetTournament, matches, awards, setAwardPrediction, groups, loadPredictions, trackedPredictions, setTrackedPredictions, compareMode } = useTournamentStore();
 
@@ -252,6 +304,58 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* Community Insights & Statistics */}
+        {stats && (
+          <div className="w-full px-4 box-border max-w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full items-stretch">
+              {/* Metric A: Global Participant Counter */}
+              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f0f1b]/80 via-[#130f24]/85 to-[#0b101c]/80 backdrop-blur-md p-6 shadow-xl flex flex-col justify-between min-h-[160px]">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-brand-gradient" />
+                <div>
+                  <span className="text-[10px] text-zinc-500 uppercase font-black tracking-wider block">
+                    TOTAL BRACKETS SUBMITTED
+                  </span>
+                  <h3 className="text-2xl sm:text-3xl font-black text-white mt-3 font-mono">
+                    <CountUpTicker value={stats.total_brackets_count} />
+                  </h3>
+                </div>
+                <p className="text-xs text-zinc-400 mt-2">
+                  Join thousands of football fans worldwide tracking predictions for the FIFA World Cup 2026.
+                </p>
+              </div>
+
+              {/* Metric B: The Champion Odds Grid */}
+              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f0f1b]/80 via-[#130f24]/85 to-[#0b101c]/80 backdrop-blur-md p-6 shadow-xl flex flex-col justify-between">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-brand-gradient" />
+                <div>
+                  <span className="text-[10px] text-zinc-500 uppercase font-black tracking-wider block mb-4">
+                    GLOBAL CHAMPION PREDICTIONS
+                  </span>
+                  <div className="space-y-3.5">
+                    {stats.champion_distribution.slice(0, 5).map((item) => (
+                      <div key={item.code} className="flex items-center gap-3 w-full">
+                        <div className="w-24 text-xs font-bold text-zinc-300 flex items-center gap-1.5 flex-shrink-0">
+                          <span className="text-sm">{getFlagEmoji(item.code)}</span>
+                          <span className="truncate">{item.name}</span>
+                        </div>
+                        <div className="flex-1 bg-neutral-800/80 h-2 rounded-full overflow-hidden border border-white/5 relative">
+                          <div 
+                            className="h-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 rounded-full shadow-[0_0_8px_rgba(234,179,8,0.3)] transition-all duration-1000 ease-out"
+                            style={{ width: `${item.percentage}%` }}
+                          />
+                        </div>
+                        <div className="w-12 text-right text-xs font-black text-amber-400 flex-shrink-0">
+                          {item.percentage}%
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Navigation Tabs */}
         <div className="flex border-b border-white/10 gap-1 overflow-x-auto scrollbar-none">
