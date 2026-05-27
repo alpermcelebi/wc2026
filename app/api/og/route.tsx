@@ -303,7 +303,7 @@ export async function GET(request: NextRequest) {
               borderRadius: '24px',
               padding: '32px 48px',
               width: '100%',
-              height: '240px',
+              height: '220px',
               overflow: 'hidden',
             }}>
               {/* Giant Flag Backdrop with low opacity */}
@@ -362,48 +362,83 @@ export async function GET(request: NextRequest) {
               )}
             </div>
 
-            {/* Final Match Score Badge directly below it */}
+            {/* Badges Row (Final Score & 3rd Place) */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
+              justifyContent: 'space-between',
               width: '100%',
               height: '90px',
-              backgroundColor: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: '16px',
-              padding: '0 24px',
             }}>
-              {s.home ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                  {/* Home Team */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                    <img src={getFlagUrlByCode(s.home)} width={38} height={26} style={{ borderRadius: '3px', objectFit: 'cover' }} />
-                    <span style={{ fontSize: '20px', fontWeight: 800, color: 'white' }}>{s.home}</span>
-                  </div>
+              {/* Final Match Score Badge */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '60%',
+                height: '90px',
+                backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '16px',
+                padding: '0 16px',
+              }}>
+                {s.home ? (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    {/* Home Team */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                      <img src={getFlagUrlByCode(s.home)} width={32} height={22} style={{ borderRadius: '2px', objectFit: 'cover' }} />
+                      <span style={{ fontSize: '18px', fontWeight: 800, color: 'white' }}>{s.home}</span>
+                    </div>
 
-                  {/* Score pill */}
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '120px' }}>
-                    <span style={{ fontSize: '14px', fontWeight: 800, color: '#eab308', letterSpacing: '2px', marginBottom: '2px', textTransform: 'uppercase' }}>GRAND FINAL</span>
-                    <span style={{ fontSize: '24px', fontWeight: 900, color: 'white', lineHeight: 1 }}>
-                      {s.homeScore !== null && s.awayScore !== null ? `${s.homeScore} – ${s.awayScore}` : 'VS'}
-                    </span>
-                    {s.homePens !== null && s.awayPens !== null && (
-                      <span style={{ fontSize: '11px', fontWeight: 800, color: '#f97316', marginTop: '2px' }}>
-                        PEN {s.homePens}–{s.awayPens}
+                    {/* Score pill */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '90px' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 800, color: '#eab308', letterSpacing: '1px', marginBottom: '2px', textTransform: 'uppercase' }}>FINAL</span>
+                      <span style={{ fontSize: '20px', fontWeight: 900, color: 'white', lineHeight: 1 }}>
+                        {s.homeScore !== null && s.awayScore !== null ? `${s.homeScore} – ${s.awayScore}` : 'VS'}
                       </span>
-                    )}
-                  </div>
+                      {s.homePens !== null && s.awayPens !== null && (
+                        <span style={{ fontSize: '9px', fontWeight: 800, color: '#f97316', marginTop: '1px' }}>
+                          PEN {s.homePens}–{s.awayPens}
+                        </span>
+                      )}
+                    </div>
 
-                  {/* Away Team */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px', flex: 1 }}>
-                    <span style={{ fontSize: '20px', fontWeight: 800, color: 'white' }}>{s.away}</span>
-                    <img src={getFlagUrlByCode(s.away)} width={38} height={26} style={{ borderRadius: '3px', objectFit: 'cover' }} />
+                    {/* Away Team */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', flex: 1 }}>
+                      <span style={{ fontSize: '18px', fontWeight: 800, color: 'white' }}>{s.away}</span>
+                      <img src={getFlagUrlByCode(s.away)} width={32} height={22} style={{ borderRadius: '2px', objectFit: 'cover' }} />
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <span style={{ fontSize: '14px', fontWeight: 700, color: 'rgba(255,255,255,0.2)', letterSpacing: '3px' }}>FINAL MATCH TBD</span>
-              )}
+                ) : (
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.2)', letterSpacing: '2px' }}>FINAL TBD</span>
+                )}
+              </div>
+
+              {/* 3rd Place Badge */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '36%',
+                height: '90px',
+                backgroundColor: 'rgba(251, 191, 36, 0.03)',
+                border: '1px solid rgba(205, 127, 50, 0.4)',
+                borderRadius: '16px',
+                padding: '8px',
+              }}>
+                <span style={{ fontSize: '10px', fontWeight: 800, color: '#cd7f32', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  3rd place
+                </span>
+                {s.third ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <img src={getFlagUrlByCode(s.third)} width={28} height={19} style={{ borderRadius: '2px', objectFit: 'cover' }} />
+                    <span style={{ fontSize: '18px', fontWeight: 900, color: 'white' }}>{s.third}</span>
+                  </div>
+                ) : (
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.2)' }}>TBD</span>
+                )}
+              </div>
             </div>
           </div>
 

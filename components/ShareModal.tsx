@@ -69,25 +69,39 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
     try {
       const response = await fetch(ogImageUrl);
       const blob = await response.blob();
-      const file = new File([blob], 'wc2026-predictions.png', { type: 'image/png' });
 
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          title: 'My WC 2026 Bracket Predictions',
-          text: 'Check out my FIFA World Cup 2026 bracket predictions!',
-          files: [file],
-        });
-      } else if (navigator.share) {
-        await navigator.share({
-          title: 'My WC 2026 Bracket Predictions',
-          text: 'Check out my FIFA World Cup 2026 bracket predictions!',
-          url: shareUrl,
-        });
+      const shareUrl = window.location.origin;
+      const shareText = "🏆 İşte benim 2026 Dünya Kupası tahminlerim! Şampiyonumu seçtim, ödülleri belirledim. Sen de kendi turnuva ağacını kur ve kupon kodunu alarak benimle kapış!";
+      const imageFile = new File([blob], "my_wc2026_bracket.png", { type: "image/png" });
+
+      if (navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+        try {
+          await navigator.share({
+            title: "FIFA World Cup 2026 Bracket",
+            text: shareText,
+            url: shareUrl,
+            files: [imageFile],
+          });
+          return;
+        } catch (error) {
+          console.log("Native share cancelled or failed:", error);
+        }
+      }
+
+      // FALLBACK BACKUP LOGIC (For Desktops/Browsers where navigator.share is restricted):
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "my_wc2026_bracket.png";
+      link.click();
+
+      try {
+        await navigator.clipboard.writeText(`${shareText}\n\nSitemizi Ziyaret Et: ${shareUrl}`);
+        alert("Görsel başarıyla indirildi! Paylaşım davet metni ve site linki panonuza kopyalandı. İstediğiniz yere yapıştırarak paylaşabilirsiniz!");
+      } catch (clipError) {
+        console.error("Clipboard migration breakdown:", clipError);
       }
     } catch (err) {
-      if ((err as Error).name !== 'AbortError') {
-        console.error('Share failed:', err);
-      }
+      console.error("Share failed:", err);
     }
   };
 

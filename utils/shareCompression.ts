@@ -56,6 +56,7 @@ export interface SharePayload {
     qfTeams: string[];
     qf: (BracketMatch | null)[];  // 4 QF match results for bracket rendering
     sf: (BracketMatch | null)[];  // 2 SF match results for bracket rendering
+    third: string;
   };
 }
 
@@ -223,6 +224,24 @@ export const serializePredictions = (
       qfTeams,
       qf: ['QF_1', 'QF_2', 'QF_3', 'QF_4'].map(id => extractBracketMatch(matches[id])),
       sf: ['SF_1', 'SF_2'].map(id => extractBracketMatch(matches[id])),
+      third: (() => {
+        const thirdPlaceMatch = matches['3RD_PLACE'];
+        const thirdHome = thirdPlaceMatch?.homeTeam?.code ?? '';
+        const thirdAway = thirdPlaceMatch?.awayTeam?.code ?? '';
+        const thirdHomeScore = thirdPlaceMatch?.homeScore ?? null;
+        const thirdAwayScore = thirdPlaceMatch?.awayScore ?? null;
+        const thirdHomePens = thirdPlaceMatch?.homePenalties ?? null;
+        const thirdAwayPens = thirdPlaceMatch?.awayPenalties ?? null;
+
+        if (thirdHomeScore !== null && thirdAwayScore !== null) {
+          if (thirdHomeScore > thirdAwayScore) return thirdHome;
+          if (thirdAwayScore > thirdHomeScore) return thirdAway;
+          if (thirdHomePens !== null && thirdAwayPens !== null) {
+            return thirdHomePens > thirdAwayPens ? thirdHome : thirdAway;
+          }
+        }
+        return '';
+      })(),
     }
   };
 
