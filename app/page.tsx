@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTournamentStore } from '../store/useTournamentStore';
 import { GroupStageView } from '../components/GroupStageView';
 import { KnockoutBracketView } from '../components/KnockoutBracketView';
@@ -12,6 +12,7 @@ import ShareModal from '../components/ShareModal';
 import AwardsGalaModal from '../components/AwardsGalaModal';
 import { TrackScoreView } from '../components/TrackScoreView';
 import { serializePredictions } from '../utils/shareCompression';
+import { calculateBracketScore } from '../utils/scoringEngine';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'groups' | 'bracket' | 'thirds' | 'awards' | 'track'>('groups');
@@ -32,15 +33,32 @@ export default function Home() {
 
   const isFinalComplete = !!matches['FINAL']?.isCompleted;
 
-  // Count how many teams have filled slots in R32
-  const qualifiedTeamsCount = Object.values(matches)
-    .filter(m => m.stage === 'r32')
-    .reduce((acc, m) => {
-      let count = acc;
-      if (m.homeTeam) count++;
-      if (m.awayTeam) count++;
-      return count;
-    }, 0);
+
+  // Compute live prediction score against saved predictions
+  const liveScore = useMemo(() => {
+    if (!savedBracketCode || typeof window === 'undefined') return 0;
+    const localData = localStorage.getItem(`local_bracket_${savedBracketCode}`);
+    if (localData) {
+      try {
+        const parsed = JSON.parse(localData);
+        if (parsed && parsed.matches && parsed.awards) {
+          const res = calculateBracketScore(parsed, {
+            matches,
+            awards: {
+              goldenBall: null,
+              goldenBoot: null,
+              goldenGlove: null,
+              bestYoungPlayer: null
+            }
+          });
+          return res.totalScore;
+        }
+      } catch (e) {
+        console.error('Error calculating live score in header:', e);
+      }
+    }
+    return 0;
+  }, [savedBracketCode, matches]);
 
   // Sync saved bracket code on client mount
   useEffect(() => {
@@ -212,11 +230,14 @@ export default function Home() {
               <span className="text-[10px] text-brand-lime font-bold mt-0.5">United States, Mexico & Canada</span>
             </div>
 
-            {/* Box 3: ADVANCING TEAMS */}
+            {/* Box 3: PREDICTION SCORE */}
             <div className="px-5 py-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col justify-center">
-              <span className="text-[10px] text-zinc-500 uppercase font-black tracking-wider block">Advancing Teams</span>
-              <span className="text-2xl sm:text-3xl font-black text-brand-purple font-mono mt-1">
-                {qualifiedTeamsCount} <span className="text-xs text-zinc-500 font-bold">/ 32</span>
+              <span className="text-[10px] text-zinc-500 uppercase font-black tracking-wider block">Prediction Score</span>
+              <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono mt-1">
+                {liveScore} <span className="text-xs font-bold text-amber-500/80">PTS</span>
+              </span>
+              <span className="text-[9px] text-zinc-500 font-bold mt-0.5">
+                #1,405 Global Leaderboard Rank
               </span>
             </div>
           </div>
