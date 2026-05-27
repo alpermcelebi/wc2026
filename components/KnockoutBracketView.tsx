@@ -168,13 +168,11 @@ export const KnockoutBracketView: React.FC<KnockoutBracketViewProps> = ({ isLock
 
             // Focus first input in next round
             const nextMatchId =
-              next === 'r16'
-                ? 'R16_1'
-                 : next === 'qf'
-                 ? 'QF_1'
-                 : key === 'sf'
-                 ? '3RD_PLACE'
-                 : 'FINAL';
+              key === 'r32' ? 'R16_1'
+              : key === 'r16' ? 'QF_1'
+              : key === 'qf' ? 'SF_1'
+              : key === 'sf' ? '3RD_PLACE'
+              : 'FINAL';
 
             const firstInput = bracketRef.current?.querySelector(`[data-match-id="${nextMatchId}"] input`) as HTMLInputElement | null;
             if (firstInput) {

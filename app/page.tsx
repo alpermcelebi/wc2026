@@ -16,6 +16,10 @@ import { calculateBracketScore, generateMockActualResults } from '../utils/scori
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'groups' | 'bracket' | 'thirds' | 'awards' | 'track'>('groups');
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeTab]);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isGalaOpen, setIsGalaOpen] = useState(false);
   
