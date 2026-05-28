@@ -20,7 +20,7 @@ export default function SharedDashboardClient({ code }: SharedDashboardClientPro
   const [activeTab, setActiveTab] = useState<'groups' | 'bracket' | 'thirds' | 'awards'>('groups');
   const [error, setError] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const { thirdPlaceLadder, importPredictions, resetTournament } = useTournamentStore();
+  const { thirdPlaceLadder, importPredictions, loadPredictions, resetTournament } = useTournamentStore();
 
   useEffect(() => {
     let active = true;
@@ -35,7 +35,7 @@ export default function SharedDashboardClient({ code }: SharedDashboardClientPro
               const parsed = JSON.parse(localData);
               if (parsed && parsed.matches && parsed.awards) {
                 if (active) {
-                  importPredictions(parsed);
+                  loadPredictions(parsed.matches, parsed.awards);
                   setIsLoaded(true);
                 }
                 return;
@@ -50,7 +50,7 @@ export default function SharedDashboardClient({ code }: SharedDashboardClientPro
           const data = await res.json();
           if (!active) return;
           if (data.success && data.predictions) {
-            importPredictions(data.predictions);
+            loadPredictions(data.predictions.matches, data.predictions.awards);
             setIsLoaded(true);
           } else {
             setError(data.error || 'Prediction bracket not found.');
@@ -75,7 +75,7 @@ export default function SharedDashboardClient({ code }: SharedDashboardClientPro
     return () => {
       active = false;
     };
-  }, [code, importPredictions]);
+  }, [code, importPredictions, loadPredictions]);
 
   const handleCreateOwn = () => {
     resetTournament();
