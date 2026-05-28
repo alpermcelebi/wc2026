@@ -52,24 +52,24 @@ export const GroupTable: React.FC<GroupTableProps> = ({ groupId, standings, isTh
 
               if (isThirdPlaceLadder) {
                 if (isQualifiedThird) {
-                  rowClass += ' bg-brand-yellow/5 hover:bg-brand-yellow/10 border-l-2 border-brand-yellow/50';
-                  badgeClass = 'text-brand-yellow bg-brand-yellow/15 font-black';
+                  rowClass += ' bg-amber-500/5 hover:bg-amber-500/10 border-l-4 border-amber-500';
+                  badgeClass = 'text-amber-400 bg-amber-500/15 font-black';
                 } else {
                   rowClass += ' opacity-55 hover:opacity-80';
                 }
               } else {
                 if (pos <= 2) {
-                  // Top 2 advance -> Green (brand-lime)
-                  rowClass += ' bg-brand-lime/5 hover:bg-brand-lime/10 border-l-2 border-brand-lime/50';
-                  badgeClass = 'text-brand-lime bg-brand-lime/15 font-bold';
+                  // Top 2 advance -> Green (emerald-500)
+                  rowClass += ' bg-emerald-500/5 hover:bg-emerald-500/10 border-l-4 border-emerald-500';
+                  badgeClass = 'text-emerald-400 bg-emerald-500/15 font-bold';
                 } else if (isThirdRow && isQualifiedThird) {
-                  // Qualified 3rd place -> Yellow (brand-yellow)
-                  rowClass += ' bg-brand-yellow/5 hover:bg-brand-yellow/10 border-l-2 border-brand-yellow/50';
-                  badgeClass = 'text-brand-yellow bg-brand-yellow/15 font-bold';
+                  // Qualified 3rd place -> Amber/Yellow (amber-500)
+                  rowClass += ' bg-amber-500/5 hover:bg-amber-500/10 border-l-4 border-amber-500';
+                  badgeClass = 'text-amber-400 bg-amber-500/15 font-bold';
                 } else if (isThirdRow) {
-                  // Non-qualified 3rd place -> Light/Dashed Yellow
-                  rowClass += ' bg-brand-yellow/5 hover:bg-brand-yellow/10 border-l-2 border-dashed border-brand-yellow/30';
-                  badgeClass = 'text-brand-yellow/60 bg-brand-yellow/10 font-bold';
+                  // Non-qualified 3rd place -> Light/Dashed Amber/Yellow
+                  rowClass += ' bg-amber-500/5 hover:bg-amber-500/10 border-l-4 border-dashed border-amber-500/40';
+                  badgeClass = 'text-amber-400/60 bg-amber-500/10 font-bold';
                 } else {
                   // 4th place
                   rowClass += ' opacity-60';

@@ -62,13 +62,13 @@ export const TEAMS_BY_GROUP: Record<string, { name: string; code: string; iso: s
     { name: 'Jordan', code: 'JOR', iso: 'jo' }
   ],
   K: [
-    { name: 'England', code: 'ENG', iso: 'gb-eng' },
+    { name: 'Portugal', code: 'POR', iso: 'pt' },
     { name: 'Colombia', code: 'COL', iso: 'co' },
     { name: 'Uzbekistan', code: 'UZB', iso: 'uz' },
     { name: 'Congo DR', code: 'COD', iso: 'cd' }
   ],
   L: [
-    { name: 'Portugal', code: 'POR', iso: 'pt' },
+    { name: 'England', code: 'ENG', iso: 'gb-eng' },
     { name: 'Croatia', code: 'CRO', iso: 'hr' },
     { name: 'Panama', code: 'PAN', iso: 'pa' },
     { name: 'Ghana', code: 'GHA', iso: 'gh' }

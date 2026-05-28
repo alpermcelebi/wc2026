@@ -169,23 +169,7 @@ export default function SharedDashboardClient({ code }: SharedDashboardClientPro
             <GitBranch className="w-4 h-4" />
             Knockout Bracket
           </button>
-          <button
-            onClick={() => setActiveTab('thirds')}
-            className={`flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-xs sm:text-sm relative transition-all duration-300 ${
-              activeTab === 'thirds'
-                ? 'border-brand-blue text-brand-blue bg-brand-blue/5'
-                : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <Table className="w-4 h-4" />
-            3rd Place Ladder
-            {thirdPlaceLadder.filter(t => t.played > 0).length > 0 && (
-              <span className="absolute top-1 right-2 flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-red opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-red"></span>
-              </span>
-            )}
-          </button>
+
           <button
             onClick={() => setActiveTab('awards')}
             className={`flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-xs sm:text-sm transition-all duration-300 ${
@@ -208,13 +192,23 @@ export default function SharedDashboardClient({ code }: SharedDashboardClientPro
           {activeTab === 'thirds' && (
             <div className="space-y-6 animate-fadeIn">
               <div className="bg-white/5 border border-white/10 rounded-2xl p-6 max-w-3xl">
-                <h3 className="font-black text-lg text-white mb-2 uppercase tracking-wide">
-                  Third-Place Standings Ladder
-                </h3>
-                <p className="text-xs text-zinc-400 leading-relaxed mb-4">
-                  After group matches are played, the 3rd-placed team from each of the 12 groups is ranked here. The **top 8 teams** (highlighted in amber) qualify for the Round of 32.
-                  Ties are broken by: **Points &gt; Goal Difference &gt; Goals For &gt; Group ID**.
-                </p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                  <div>
+                    <h3 className="font-black text-lg text-white uppercase tracking-wide">
+                      Third-Place Standings Ladder
+                    </h3>
+                    <p className="text-xs text-zinc-400 leading-relaxed mt-1">
+                      After group matches are played, the 3rd-placed team from each of the 12 groups is ranked here. The **top 8 teams** qualify for the Round of 32.
+                      Ties are broken by: **Points &gt; Goal Difference &gt; Goals For &gt; Group ID**.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('groups')}
+                    className="flex-shrink-0 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold text-xs transition-all duration-300 flex items-center gap-1.5 self-start sm:self-auto shadow-md"
+                  >
+                    ← Back to Groups
+                  </button>
+                </div>
                 {thirdPlaceLadder.length === 0 ? (
                   <div className="text-center py-12 text-zinc-500 text-sm border border-dashed border-white/10 rounded-xl">
                     Predict some group stage scores to populate the third-place ladder!
