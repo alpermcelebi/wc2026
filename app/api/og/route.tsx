@@ -1,9 +1,8 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
-import { deserializePredictions, getFlagUrlByCode } from '../../../utils/shareCompression';
+import { deserializePredictions, serializePredictions, getFlagUrlByCode } from '../../../utils/shareCompression';
 import type { BracketMatch } from '../../../utils/shareCompression';
-
-export const runtime = 'edge';
+import { supabase, isSupabaseConfigured } from '../../../utils/supabaseClient';
 
 const CODE_TO_NAME: Record<string, string> = {
   MEX: 'Mexico', KOR: 'South Korea', RSA: 'South Africa', CZE: 'Czechia',
@@ -40,7 +39,29 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const { s } = deserializePredictions(code);
+    let s: any;
+    if (code.length <= 8) {
+      if (!isSupabaseConfigured) {
+        return new Response('Supabase not configured to resolve short codes', { status: 500 });
+      }
+      const { data, error } = await supabase
+        .from('user_brackets')
+        .select('predictions_data')
+        .eq('bracket_code', code.toUpperCase())
+        .maybeSingle();
+
+      if (error || !data) {
+        return new Response(`Bracket predictions not found for code: ${code}`, { status: 404 });
+      }
+
+      const { matches, awards } = data.predictions_data;
+      const serialized = serializePredictions(matches, awards);
+      const deserialized = deserializePredictions(serialized);
+      s = deserialized.s;
+    } else {
+      const deserialized = deserializePredictions(code);
+      s = deserialized.s;
+    }
 
     const qf = s.qf || [null, null, null, null];
     const sf = s.sf || [null, null];

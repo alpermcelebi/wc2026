@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Copy, Check, Share2, Download, ExternalLink } from 'lucide-react';
+import { useTournamentStore } from '../store/useTournamentStore';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -10,16 +11,56 @@ interface ShareModalProps {
 }
 
 export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalProps) {
+  const { matches, awards } = useTournamentStore();
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const [downloading, setDownloading] = useState(false);
   const [sharingPlatform, setSharingPlatform] = useState<'twitter' | 'whatsapp' | null>(null);
+  const [shortCode, setShortCode] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setShortCode(null);
+
+    async function autoSaveBracket() {
+      setIsSaving(true);
+      try {
+        const res = await fetch('/api/bracket', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            predictions: { matches, awards }
+          })
+        });
+        const data = await res.json();
+        if (data.success && data.code) {
+          setShortCode(data.code);
+          localStorage.setItem('saved_bracket_code', data.code);
+          
+          if (data.mock) {
+            localStorage.setItem(`local_bracket_${data.code}`, JSON.stringify({ matches, awards }));
+          }
+        }
+      } catch (err) {
+        console.error('Error auto-saving bracket for sharing:', err);
+      } finally {
+        setIsSaving(false);
+      }
+    }
+
+    autoSaveBracket();
+  }, [isOpen, matches, awards]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setShareUrl(`${window.location.protocol}//${window.location.host}/share/${shareCode}`);
+      const activeCode = shortCode || shareCode;
+      setShareUrl(`${window.location.protocol}//${window.location.host}/share/${activeCode}`);
     }
-  }, [shareCode]);
+  }, [shareCode, shortCode]);
 
   useEffect(() => {
     if (isOpen) {
@@ -67,13 +108,13 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
     }
   };
 
-  const shareText = "🏆 İşte benim 2026 Dünya Kupası tahminlerim! Şampiyonumu seçtim, ödülleri belirledim. Sen de kendi turnuva ağacını kur ve kupon kodunu alarak benimle kapış!";
+  const shareText = "🏆 2026 Dünya Kupası Tahminlerim hazır! Turnuva ağacımı tamamladım ve ödül kazananlarımı seçtim. Posterimi incele ve sen de kendi tahminlerini oluştur!";
 
   const handleShare = async (e: React.MouseEvent, platform: 'twitter' | 'whatsapp') => {
     e.preventDefault();
     setSharingPlatform(platform);
     
-    const shareTextWithUrl = `${shareText}\n\n${shareUrl}`;
+    const shareTextWithUrl = `${shareText}\n\n👉 ${shareUrl}`;
     
     try {
       const response = await fetch(ogImageUrl);
@@ -204,14 +245,17 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
               <input
                 type="text"
                 readOnly
-                value={shareUrl}
+                value={isSaving ? 'Generating short link...' : shareUrl}
                 className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm touch-manipulation text-zinc-300 font-mono focus:outline-none focus:border-brand-purple transition-all duration-300"
-                onClick={(e) => (e.target as HTMLInputElement).select()}
+                onClick={(e) => !isSaving && (e.target as HTMLInputElement).select()}
               />
               <button
                 onClick={handleCopy}
+                disabled={isSaving}
                 className={`flex items-center justify-center gap-2 px-4 rounded-xl font-bold text-xs transition-all duration-300 min-w-[100px] ${
-                  copied
+                  isSaving
+                    ? 'bg-zinc-800/40 text-zinc-500 border border-zinc-700/35 cursor-not-allowed'
+                    : copied
                     ? 'bg-brand-lime/10 text-brand-lime border border-brand-lime/20'
                     : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
                 }`}
@@ -236,7 +280,7 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
             {/* Twitter/X */}
             <button
               onClick={(e) => handleShare(e, 'twitter')}
-              disabled={sharingPlatform !== null || downloading}
+              disabled={sharingPlatform !== null || downloading || isSaving}
               className="flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 font-black text-sm text-white transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
             >
               {sharingPlatform === 'twitter' ? (
@@ -252,7 +296,7 @@ export default function ShareModal({ isOpen, onClose, shareCode }: ShareModalPro
             {/* WhatsApp */}
             <button
               onClick={(e) => handleShare(e, 'whatsapp')}
-              disabled={sharingPlatform !== null || downloading}
+              disabled={sharingPlatform !== null || downloading || isSaving}
               className="flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 font-black text-sm text-emerald-400 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
             >
               {sharingPlatform === 'whatsapp' ? (

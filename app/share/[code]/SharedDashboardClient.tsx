@@ -23,16 +23,58 @@ export default function SharedDashboardClient({ code }: SharedDashboardClientPro
   const { thirdPlaceLadder, importPredictions, resetTournament } = useTournamentStore();
 
   useEffect(() => {
-    try {
-      if (code) {
-        const parsed = deserializePredictions(code);
-        importPredictions(parsed);
-        setIsLoaded(true);
+    let active = true;
+    async function loadData() {
+      if (!code) return;
+      try {
+        if (code.length <= 8) {
+          // 1. Try to load from localStorage first (for local testing in mock mode)
+          const localData = localStorage.getItem(`local_bracket_${code}`);
+          if (localData) {
+            try {
+              const parsed = JSON.parse(localData);
+              if (parsed && parsed.matches && parsed.awards) {
+                if (active) {
+                  importPredictions(parsed);
+                  setIsLoaded(true);
+                }
+                return;
+              }
+            } catch (e) {
+              console.error('Error parsing local mock data:', e);
+            }
+          }
+
+          // 2. Fetch predictions from the database via API
+          const res = await fetch(`/api/bracket?code=${code}`);
+          const data = await res.json();
+          if (!active) return;
+          if (data.success && data.predictions) {
+            importPredictions(data.predictions);
+            setIsLoaded(true);
+          } else {
+            setError(data.error || 'Prediction bracket not found.');
+          }
+        } else {
+          // It's a long serialized predictions string
+          const parsed = deserializePredictions(code);
+          if (active) {
+            importPredictions(parsed);
+            setIsLoaded(true);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load predictions:', err);
+        if (active) {
+          setError('Failed to load prediction bracket from the server.');
+        }
       }
-    } catch (err) {
-      console.error('Failed to parse share code:', err);
-      setError('The shared prediction link is invalid or has been corrupted.');
     }
+
+    loadData();
+    return () => {
+      active = false;
+    };
   }, [code, importPredictions]);
 
   const handleCreateOwn = () => {
