@@ -138,6 +138,34 @@ export const MatchCard: React.FC<MatchCardProps> = ({
     }
   };
 
+  const handleScoreKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow navigation, deletion, copy/paste shortcuts
+    if (
+      e.key === 'Backspace' ||
+      e.key === 'Delete' ||
+      e.key === 'Tab' ||
+      e.key === 'Enter' ||
+      e.key === 'ArrowLeft' ||
+      e.key === 'ArrowRight' ||
+      e.key === 'ArrowUp' ||
+      e.key === 'ArrowDown' ||
+      e.key === 'Home' ||
+      e.key === 'End' ||
+      e.metaKey ||
+      e.ctrlKey
+    ) {
+      if (e.key === 'Enter') {
+        handleInputKeyDown(e);
+      }
+      return;
+    }
+
+    // Block non-digit keys (letters, symbols, exponents, signs, decimals)
+    if (!/^[0-9]$/.test(e.key)) {
+      e.preventDefault();
+    }
+  };
+
   const handleInputBlur = () => {
     if (homeScore !== null && awayScore !== null && onComplete) {
       if (homeScore === awayScore) {
@@ -322,10 +350,12 @@ export const MatchCard: React.FC<MatchCardProps> = ({
           <input
             type="number"
             min="0"
+            inputMode="numeric"
+            pattern="[0-9]*"
             disabled={isLocked || (isKnockout ? (!isFocused || !homeTeam || !awayTeam) : (!homeTeam || !awayTeam))}
             value={homeScore ?? ''}
             onChange={handleHomeScoreChange}
-            onKeyDown={handleInputKeyDown}
+            onKeyDown={handleScoreKeyDown}
             onBlur={handleInputBlur}
             onFocus={handleFocus}
             placeholder="-"
@@ -344,10 +374,12 @@ export const MatchCard: React.FC<MatchCardProps> = ({
           <input
             type="number"
             min="0"
+            inputMode="numeric"
+            pattern="[0-9]*"
             disabled={isLocked || (isKnockout ? (!isFocused || !homeTeam || !awayTeam) : (!homeTeam || !awayTeam))}
             value={awayScore ?? ''}
             onChange={handleAwayScoreChange}
-            onKeyDown={handleInputKeyDown}
+            onKeyDown={handleScoreKeyDown}
             onBlur={handleInputBlur}
             onFocus={handleFocus}
             placeholder="-"
@@ -368,10 +400,12 @@ export const MatchCard: React.FC<MatchCardProps> = ({
               <input
                 type="number"
                 min="0"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 disabled={isLocked || !isFocused}
                 value={homePenalties ?? ''}
                 onChange={handleHomePensChange}
-                onKeyDown={handleInputKeyDown}
+                onKeyDown={handleScoreKeyDown}
                 onBlur={handleInputBlur}
                 onFocus={handleFocus}
                 placeholder="0"
@@ -383,10 +417,12 @@ export const MatchCard: React.FC<MatchCardProps> = ({
               <input
                 type="number"
                 min="0"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 disabled={isLocked || !isFocused}
                 value={awayPenalties ?? ''}
                 onChange={handleAwayPensChange}
-                onKeyDown={handleInputKeyDown}
+                onKeyDown={handleScoreKeyDown}
                 onBlur={handleInputBlur}
                 onFocus={handleFocus}
                 placeholder="0"

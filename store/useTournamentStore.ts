@@ -492,17 +492,50 @@ export const useTournamentStore = create<TournamentStore>((set, get) => {
       });
     },
 
-    loadPredictions: (matches, awards) => {
+    loadPredictions: (loadedMatches, awards) => {
+      // 1. Generate fresh matches with the correct/new team seedings
+      const freshMatches = {
+        ...generateGroupMatches(),
+        ...generateKnockoutMatches()
+      };
       const initialGroups = calculateInitialGroups();
       const newGroups = JSON.parse(JSON.stringify(initialGroups)) as Record<string, GroupState>;
-      
+
+      // 2. Merge scores from loadedMatches
+      Object.entries(loadedMatches).forEach(([id, loadedMatch]) => {
+        const freshMatch = freshMatches[id];
+        if (freshMatch && loadedMatch) {
+          freshMatch.homeScore = loadedMatch.homeScore;
+          freshMatch.awayScore = loadedMatch.awayScore;
+          freshMatch.isCompleted = loadedMatch.isCompleted;
+          if (freshMatch.stage !== 'group') {
+            freshMatch.homePenalties = loadedMatch.homePenalties;
+            freshMatch.awayPenalties = loadedMatch.awayPenalties;
+          }
+        }
+      });
+
+      // 3. Recalculate group tables and standings
       Object.keys(newGroups).forEach(groupId => {
-        recalculateGroup(groupId, matches, newGroups);
+        recalculateGroup(groupId, freshMatches, newGroups);
       });
       const newLadder = calculateThirdPlaceLadder(newGroups);
-      
+
+      // 4. Update Round of 32 matchups based on group standings
+      updateRoundOf32Matchups(freshMatches, newGroups);
+
+      // 5. Propagate knockout winners chronologically
+      const knockoutOrder = ['R32_', 'R16_', 'QF_', 'SF_', '3RD_PLACE', 'FINAL'];
+      knockoutOrder.forEach(prefix => {
+        Object.entries(freshMatches).forEach(([id, match]) => {
+          if (id.startsWith(prefix) && match.isCompleted) {
+            propagateMatchWinner(id, freshMatches);
+          }
+        });
+      });
+
       set({
-        matches,
+        matches: freshMatches,
         groups: newGroups,
         thirdPlaceLadder: newLadder,
         awards
